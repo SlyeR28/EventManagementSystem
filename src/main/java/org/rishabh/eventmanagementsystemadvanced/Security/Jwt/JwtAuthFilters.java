@@ -21,33 +21,42 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthFilters extends OncePerRequestFilter {
 
-    private final JwtUtils jWtUtils;
+    private final JwtUtils jwtUtils;
     private final CustomUserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         String username = null;
         String token = null;
 
-        if(authHeader != null &&  authHeader.startsWith("Bearer ")){
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
-            username  = jWtUtils.extractUsername(token);
+            username = jwtUtils.extractUsername(token);
         }
-        if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-            List<String> roles = this.jWtUtils.extractRoles(token);
-            List<SimpleGrantedAuthority> authorities =
-                    roles.stream().map(role -> new SimpleGrantedAuthority(role))
-                            .toList();
-            if(jWtUtils.validToken(token , userDetails.getUsername())){
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userDetails , null , authorities);
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
 
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            List<String> roles = jwtUtils.extractRoles(token);
+
+            List<SimpleGrantedAuthority> authorities = roles.stream()
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // ✅ add ROLE_ prefix
+                    .toList();
+
+            if (jwtUtils.validToken(token, userDetails.getUsername())) {
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+                System.out.println("✅ Authenticated user: " + username + " with roles " + authorities);
+            } else {
+                System.out.println("❌ Invalid or expired token for user: " + username);
+            }
         }
+
         filterChain.doFilter(request, response);
     }
 }

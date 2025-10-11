@@ -5,24 +5,26 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
 @Component
+@RequiredArgsConstructor
 public class JwtUtils {
-    private static  String secretKey ;
 
-    public JwtUtils() {
-        SecureRandom random = new SecureRandom();
-        byte [] key = new byte[32];
-        random.nextBytes(key);
-        secretKey = Base64.getEncoder().encodeToString(key);
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+
+    public JwtUtils(String secretKey) {
+        this.secretKey = secretKey;
+
     }
 
     public String generateToken(String username , List<String> roles){
