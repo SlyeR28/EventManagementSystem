@@ -37,7 +37,7 @@ public class JwtUtils {
                 .compact();
 
     }
-    private Key getSignedKey(){
+    private Key getSignedKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -65,7 +65,7 @@ public class JwtUtils {
 
 
     public <T> T extractClaim(String token , Function<Claims , T> claimsResolvers){
-        final Claims  claims = Jwts.parser()
+        final Claims claims = Jwts.parser()
                 .setSigningKey(getSignedKey())
                 .build()
                 .parseClaimsJws(token)
