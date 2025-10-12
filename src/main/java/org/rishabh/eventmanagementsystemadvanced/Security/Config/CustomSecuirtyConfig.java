@@ -1,13 +1,12 @@
 package org.rishabh.eventmanagementsystemadvanced.Security.Config;
 
 import lombok.RequiredArgsConstructor;
-import org.rishabh.eventmanagementsystemadvanced.Security.Jwt.JwtAuthFilters;
+import org.rishabh.eventmanagementsystemadvanced.Security.Jwt.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -32,13 +31,13 @@ import java.util.List;
 public class CustomSecuirtyConfig {
 
     private final UserDetailsService  userDetailsService;
-    private final JwtAuthFilters  jwtAuthFilters;
+    private final JwtAuthFilter  jwtAuthFilters;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                      .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
+                .cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/api/v1/register", "/api/v1/login", "/api/v1/activation/**").permitAll()

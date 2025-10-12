@@ -64,18 +64,6 @@ public class UserSerivceImpl implements UserService {
     }
 
 
-
-    // helper method to activate user
-    public boolean activateUser(String activationToken) {
-        return userRepository.findByActivationCode(activationToken).map(
-                user -> {
-                    user.setIsActive(true);
-                    userRepository.save(user);
-                    return true;
-                }
-        ).orElse(false);
-    }
-
     //helper method to find current user
     public User getCurrentUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -5,15 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class AuthResponse {
 
+    private String email;
     private String token;
-    private String username;
-   private LocalDateTime loginDate = LocalDateTime.now();
+
 }

@@ -19,7 +19,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class JwtAuthFilters extends OncePerRequestFilter {
+public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
     private final CustomUserDetailsService userDetailsService;
@@ -28,24 +28,27 @@ public class JwtAuthFilters extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
         String authHeader = request.getHeader("Authorization");
         String username = null;
         String token = null;
 
+        // ✅ Extract Bearer token
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             username = jwtUtils.extractUsername(token);
         }
 
+        // ✅ Validate and set authentication
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            List<String> roles = jwtUtils.extractRoles(token);
 
-            List<SimpleGrantedAuthority> authorities = roles.stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // ✅ add ROLE_ prefix
-                    .toList();
+            if (jwtUtils.validateToken(token, userDetails.getUsername())) {
+                List<String> roles = jwtUtils.extractRoles(token);
+                List<SimpleGrantedAuthority> authorities = roles.stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                        .toList();
 
-            if (jwtUtils.validToken(token, userDetails.getUsername())) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -53,10 +56,12 @@ public class JwtAuthFilters extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
                 System.out.println("✅ Authenticated user: " + username + " with roles " + authorities);
             } else {
-                System.out.println("❌ Invalid or expired token for user: " + username);
+                System.out.println("❌ Invalid or expired JWT token for user: " + username);
             }
         }
 
         filterChain.doFilter(request, response);
     }
 }
+
+

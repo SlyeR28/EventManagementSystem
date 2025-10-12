@@ -46,9 +46,10 @@ public class User {
     @Column(length = 500)
     private String imageUrl;
 
+    private String publicId;
+
     @Column(length = 100)
     private String activationCode;
-
 
     private Boolean isActive;
 
