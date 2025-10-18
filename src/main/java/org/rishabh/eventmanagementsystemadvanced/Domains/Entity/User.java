@@ -20,7 +20,8 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE , generator = "seq_gen")
+    @SequenceGenerator(name = "seq_gen" , sequenceName = "seq" , initialValue = 1000 ,allocationSize = 10)
     private Long id;
 
     @Column(nullable = false , length = 50)
@@ -32,9 +33,6 @@ public class User {
     @Column(nullable = false , length = 150)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -48,16 +46,21 @@ public class User {
 
     private String publicId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
     @Column(length = 100)
     private String activationCode;
 
     private Boolean isActive;
 
+
     @PrePersist
     public void prePersist() {
         // Set default role if not assigned
         if (role == null) {
-            role = Role.USER;
+            role = Role.ATTENDEE;
         }
         if(this.isActive == null){
             isActive = false;

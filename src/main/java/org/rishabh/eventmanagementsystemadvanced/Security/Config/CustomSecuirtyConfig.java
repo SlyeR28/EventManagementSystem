@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,19 +37,19 @@ public class CustomSecuirtyConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                     .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors->cors.configurationSource(corsConfigurationSource()))
+                .cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/api/v1/register", "/api/v1/login", "/api/v1/activation/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        // Admin-only endpoints
-                        // All other endpoints require authentication
+                        .requestMatchers(
+                                "/api/v1/user/register",
+                                "/api/v1/auth/login",
+                                "/api/v1/user/activation"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
-                // Stateless session
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Add JWT filter
+                .authenticationProvider(authenticationProvider())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilters, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -82,7 +83,5 @@ public class CustomSecuirtyConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
-
-
 
 }

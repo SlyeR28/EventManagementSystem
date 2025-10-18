@@ -1,35 +1,20 @@
 package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.AuthResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.UserDto;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.AuthRequest;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.UserRequest;
-import org.rishabh.eventmanagementsystemadvanced.Security.Jwt.JwtUtils;
-import org.rishabh.eventmanagementsystemadvanced.Security.Services.CustomUserDetailsService;
 import org.rishabh.eventmanagementsystemadvanced.Services.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1")
+@RequestMapping("/api/v1/user")
 public class UserController {
     private final UserService userService;
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtils jwtUtils;
-    private final CustomUserDetailsService customUserDetailsService;
+
 
     @PostMapping("/register")
     public ResponseEntity<UserDto>registerUser(@RequestBody UserRequest user){
@@ -37,6 +22,22 @@ public class UserController {
         return  ResponseEntity.ok(user1);
     }
 
+
+    @GetMapping("/activation")
+    public ResponseEntity<String>activateUser(@RequestParam("token") String token){
+        boolean isActivated = userService.activateUser(token);
+        if(isActivated){
+            return ResponseEntity.ok("your account has been activated successfully");
+        }else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Activation Token Not Found or Expired");
+        }
+    }
+
+
+
+    //update profile
+    //get single profile
+    // getAll profile by pagination
 
 
 

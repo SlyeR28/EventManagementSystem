@@ -33,7 +33,7 @@ public class UserSerivceImpl implements UserService {
         entity.setActivationCode(UUID.randomUUID().toString());
         entity.setPassword(passwordEncoder.encode(entity.getPassword()));
         User saved = userRepository.save(entity);
-        String activationLink = "http://localhost:8080/api/v1/activation?token="  + saved.getActivationCode();
+        String activationLink = "http://localhost:8080/api/v1/user/activation?token="  + saved.getActivationCode();
         String subject = "Activate your Event Manager Account ";
         String body = "Click on the following link to activate your account : " + activationLink;
         mailService.sendMail(entity.getEmail(), subject, body);
@@ -41,11 +41,20 @@ public class UserSerivceImpl implements UserService {
     }
 
     @Override
+    public boolean activateUser(String activationToken) {
+        return userRepository.findByActivationCode(activationToken).
+                map(user -> {
+                    user.setIsActive(true);
+                    userRepository.save(user);
+                    return true;
+                }).orElse(false);
+    }
+
+    @Override
     public UserDto updateUser(Long userId, UserRequest userRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id " + userId));
         user.setEmail(userRequest.getEmail());
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User saved = userRepository.save(user);
         return  userMapper.toDto(saved);
     }
@@ -61,6 +70,13 @@ public class UserSerivceImpl implements UserService {
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
         return users.stream().map(userMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isAccountActivated(String email) {
+        return userRepository.findByEmail(email).
+                map(User::getIsActive).
+                orElse(false);
     }
 
 
