@@ -14,12 +14,23 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailException.class)
-    public ResponseEntity<String> handleEmailException(EmailException ex){
+    public ResponseEntity<Map<String , Object>> handleEmailException(EmailException ex){
+        log.error(" EmailException: {}"  , ex.getMessage());
         Map<String , Object>  body = new HashMap<>();
         body.put("timestamp", System.currentTimeMillis());
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", ex.getMessage());
 
-        return new ResponseEntity<>(body.toString(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(body , HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ImageException.class)
+    public ResponseEntity<Map<String , Object>> handleImageException(ImageException ex){
+        log.error(" ImageException: {}"  , ex.getMessage());
+        Map<String , Object>  body = new HashMap<>();
+        body.put("timestamp", System.currentTimeMillis());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", ex.getMessage());
+        return new ResponseEntity<>(body , HttpStatus.BAD_REQUEST);
     }
 }

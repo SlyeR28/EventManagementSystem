@@ -10,6 +10,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.Role;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,7 +23,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE , generator = "seq_gen")
-    @SequenceGenerator(name = "seq_gen" , sequenceName = "seq" , initialValue = 1000 ,allocationSize = 10)
+    @SequenceGenerator(name = "seq_gen" , sequenceName = "user_seq" , initialValue = 1000 ,allocationSize = 10)
     private Long id;
 
     @Column(nullable = false , length = 50)
@@ -41,10 +43,8 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime modifiedDate;
 
-    @Column(length = 500)
-    private String imageUrl;
-
-    private String publicId;
+    @OneToOne(mappedBy = "user")
+    private Images images;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -54,6 +54,28 @@ public class User {
     private String activationCode;
 
     private Boolean isActive;
+
+
+    @OneToMany( mappedBy = "organizer",cascade = CascadeType.ALL)
+    private List<Event> organizedEvents = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_attending_events",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_id")
+
+    )
+    private List<Event>attendingEvents = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_staffing_events",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_id")
+
+    )
+    private List<Event>staffingEvents = new ArrayList<>();
 
 
     @PrePersist
