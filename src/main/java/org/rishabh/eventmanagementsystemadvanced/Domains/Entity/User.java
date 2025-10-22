@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.Role;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,17 +37,6 @@ public class User {
     @Column(nullable = false , length = 150)
     private String password;
 
-
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-
-    @UpdateTimestamp
-    private LocalDateTime modifiedDate;
-
-    @OneToOne(mappedBy = "user")
-    private Images images;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -56,26 +47,34 @@ public class User {
     private Boolean isActive;
 
 
-    @OneToMany( mappedBy = "organizer",cascade = CascadeType.ALL)
-    private List<Event> organizedEvents = new ArrayList<>();
 
+    @OneToOne(cascade = CascadeType.ALL , orphanRemoval = true)
+    @JoinColumn(name = "image_id")
+    private Images profileImage;
+
+    @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL)
+    private List<Event> organizedEvents = new ArrayList<>();
     @ManyToMany
     @JoinTable(
             name = "user_attending_events",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id")
-
     )
-    private List<Event>attendingEvents = new ArrayList<>();
-
+    private List<Event> attendingEvents = new ArrayList<>();
     @ManyToMany
     @JoinTable(
             name = "user_staffing_events",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id")
-
     )
-    private List<Event>staffingEvents = new ArrayList<>();
+    private List<Event> staffingEvents = new ArrayList<>();
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate
+    private LocalDateTime modifiedDate;
 
 
     @PrePersist
@@ -88,5 +87,5 @@ public class User {
             isActive = false;
         }
     }
-
+    
 }

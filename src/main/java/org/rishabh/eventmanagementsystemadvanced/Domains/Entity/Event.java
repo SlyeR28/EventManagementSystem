@@ -1,10 +1,7 @@
 package org.rishabh.eventmanagementsystemadvanced.Domains.Entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.EventStatus;
@@ -12,19 +9,19 @@ import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.EventStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-@Data
 @Entity
 @Table(name = "event")
 public class Event {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Long id;
 
     @Column(length = 100 , nullable = false)
     private String name;
@@ -51,18 +48,36 @@ public class Event {
     @Column(name="Sales_end")
     private LocalDateTime salesEndTime;
 
+
+    //Relation with User as Organizer
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organizer_id")
-    private User  organizer;
+    private User organizer;
 
+
+    // Relation with User as attendees who attend's event
     @ManyToMany(mappedBy = "attendingEvents")
-    private List<User>attendees = new ArrayList<>();
+    private List<User>attendees= new ArrayList<>();
 
+    //Relation with User as Working staff who ar managing the event
     @ManyToMany(mappedBy = "staffingEvents")
-    private List<User>staff = new ArrayList<>();
+    private List<User> staff = new ArrayList<>();
 
-    @OneToMany(mappedBy = "event" , cascade = CascadeType.ALL , orphanRemoval = true)
-    private List<Images> eventImages = new ArrayList<>();
+    // Relation with TicketType
+    @OneToMany(mappedBy = "event" ,  cascade = CascadeType.ALL)
+    private List<TicketType>ticketTypes = new ArrayList<>();
+
+
+    //relation with category
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+
+    @OneToMany(mappedBy = "event" ,  cascade = CascadeType.ALL , orphanRemoval = true)
+    private List<Images>images = new ArrayList<>();
+
+
 
     @CreationTimestamp
     @Column(updatable = false)

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.TicketStatus;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -17,32 +18,33 @@ import java.util.List;
 @Builder
 @Data
 @Entity
-@Table(name = "Tcket_type")
-public class TicketType {
+@Table(name = "Ticket")
+public class Ticket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
-    private Double price;
-
-    @Column(nullable = false)
-    private Integer totalAvailable;
+    @Column(name = "status" , nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TicketStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id")
-    private Event event;
+    @JoinColumn(name = "ticket_type_id")
+    private TicketType ticketType;
 
-    @OneToMany(mappedBy = "ticketType" , cascade = CascadeType.ALL)
-    private List<Ticket> tickets = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "purchaser_id")
+    private User purchaser;
+
+
+    @OneToMany(mappedBy = "ticket" , cascade = CascadeType.ALL)
+    private List<TicketValidation> validations =  new ArrayList<>();
+
 
 
     @CreatedDate
-    @Column(updatable = false)
+    @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate

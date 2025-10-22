@@ -1,8 +1,7 @@
 package org.rishabh.eventmanagementsystemadvanced.Domains.Modal;
 
-public enum TicketStatus {
-    PURCHASED,
-    PENDING,
-    CANCELLED,
+public enum TicketValidationStatus {
+    VALID,
+    INVALID,
     EXPIRED
 }

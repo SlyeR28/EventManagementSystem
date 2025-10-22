@@ -26,9 +26,7 @@ public class EventDto {
     private LocalDateTime salesEndTime;
 
     private Long organizerId;
-    private List<Long> staffIds;
 
-    private List<ImageInfo> images;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

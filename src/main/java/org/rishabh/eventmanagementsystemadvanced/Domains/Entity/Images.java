@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -25,14 +27,22 @@ public class Images {
 
     private String publicId;
 
-    private LocalDateTime uploadAt;
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime uploadedAt = LocalDateTime.now();
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "event_id")
     private Event event;
+
+    @OneToOne(mappedBy = "profileImage")
+    private User user;
+
+
+
+
 
 }
