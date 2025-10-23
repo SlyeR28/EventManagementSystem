@@ -18,15 +18,15 @@ public class ImageServiceImpl implements ImageService {
 
     private final Cloudinary cloudinary;
 
-    @Override
-    public ImageInfo uploadImage(MultipartFile file) throws IOException {
-        Map upload = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-
-        return new ImageInfo(
-                upload.get("public_id").toString(),
-                upload.get("secured_url").toString(),
-                upload.get("format").toString(),
-                (LocalDateTime) upload.get("uploaded_at")
-        );
-    }
+//    @Override
+//    public ImageInfo uploadImage(MultipartFile file) throws IOException {
+//        Map upload = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+//
+//        return new ImageInfo(
+//                upload.get("public_id").toString(),
+//                upload.get("secured_url").toString(),
+//                upload.get("format").toString(),
+//                (LocalDateTime) upload.get("uploaded_at")
+//        );
+//    }
 }

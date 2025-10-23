@@ -23,7 +23,7 @@ public class Images {
     @SequenceGenerator(name = "image_url" , sequenceName = "image_seq" , initialValue = 2000 , allocationSize = 10)
     private Long id;
 
-    private String imageUrl;
+    private String securedUrl;
 
     private String publicId;
 
@@ -37,12 +37,6 @@ public class Images {
     @ManyToOne
     @JoinColumn(name = "event_id")
     private Event event;
-
-    @OneToOne(mappedBy = "profileImage")
-    private User user;
-
-
-
 
 
 }

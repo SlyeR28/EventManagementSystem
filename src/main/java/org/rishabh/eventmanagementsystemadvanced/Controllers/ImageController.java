@@ -14,14 +14,14 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class ImageController {
 
-    private final ImageService imageService;
-
-
-    @PostMapping("/upload")
-    public ResponseEntity<ImageInfo> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
-        ImageInfo imageInfo = imageService.uploadImage(file);
-       return ResponseEntity.ok().body(imageInfo);
-    }
+//    private final ImageService imageService;
+//
+//
+//    @PostMapping("/upload")
+//    public ResponseEntity<ImageInfo> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
+//        ImageInfo imageInfo = imageService.uploadImage(file);
+//       return ResponseEntity.ok().body(imageInfo);
+//    }
 
 
 }

@@ -1,6 +1,8 @@
 package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.Role;
+import org.springframework.data.domain.*;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.User;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.UserMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.UserDto;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,8 +56,26 @@ public class UserSerivceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id " + userId));
         user.setEmail(userRequest.getEmail());
+        user.setFullName(userRequest.getFullName());
         User saved = userRepository.save(user);
         return  userMapper.toDto(saved);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id " + id));
+        userRepository.delete(user);
+    }
+
+    @Override
+    public Page<UserDto> getAllUsersByRole(Role role, int page , int size , String sortBy , String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?
+                Sort.by(sortBy).ascending():
+                Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<User> byRole = userRepository.findByRole(role, pageable);
+        return byRole.map(userMapper::toDto);
     }
 
     @Override
@@ -67,9 +86,14 @@ public class UserSerivceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream().map(userMapper::toDto).collect(Collectors.toList());
+    public Page<UserDto> getAllUsers(int page, int size, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?
+                Sort.by(sortBy).ascending():
+                Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<User>userPage = userRepository.findAll(pageable);
+        List<UserDto> userDtos = userPage.getContent().stream().map(userMapper::toDto).toList();
+        return new PageImpl<>(userDtos ,  pageable, userPage.getTotalElements());
     }
 
     @Override
@@ -86,7 +110,5 @@ public class UserSerivceImpl implements UserService {
         return userRepository.findByEmail(authentication.getName()).orElseThrow(
                 () -> new UsernameNotFoundException("User not found with email " + authentication.getName()));
     }
-
-
 
 }
