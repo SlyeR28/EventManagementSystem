@@ -45,6 +45,7 @@ public class CustomSecuirtyConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/user/activation"
                         ).permitAll()
+                        .requestMatchers("/api/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

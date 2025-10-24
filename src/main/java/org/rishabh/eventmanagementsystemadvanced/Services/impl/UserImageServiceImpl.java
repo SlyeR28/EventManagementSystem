@@ -41,22 +41,25 @@ public class UserImageServiceImpl extends ImageBase implements UserImageService 
                 .user(user)
                 .uploadedAt(imageInfo.uploadedAt())
                 .build();
-
-        return null;
+        imageRepository.save(image);
+        return imageInfo;
     }
 
     @Override
     public ImageInfo updateUserImage(MultipartFile file, User user) throws IOException {
-        return null;
+        return uploadUserImage(file, user);
     }
 
     @Override
     public ImageInfo getUserImage(User user) {
-        return null;
+        return imageRepository.findFirstByUser(user).map(imageMapper::toImageInfo).orElse(null);
     }
 
     @Override
     public void deleteUserImage(User user) {
-
+        imageRepository.findFirstByUser(user).ifPresent(img -> {
+            delete(img.getPublicId());
+            imageRepository.delete(img);
+        });
     }
 }
