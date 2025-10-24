@@ -1,19 +1,19 @@
 package org.rishabh.eventmanagementsystemadvanced.Domains.Entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Data
+@EntityListeners(AuditingEntityListener.class)
+@Getter
+@Setter
 @Entity
 @Table(name = "Images")
 public class Images {
@@ -27,16 +27,24 @@ public class Images {
 
     private String publicId;
 
-    @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime uploadedAt = LocalDateTime.now();
+    private String folder;
 
-    @UpdateTimestamp
+    private String format;
+
+
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime uploadedAt;
+
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "event_id")
     private Event event;
 
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
 }

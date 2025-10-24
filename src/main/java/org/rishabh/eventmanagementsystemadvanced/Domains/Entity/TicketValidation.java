@@ -9,6 +9,7 @@ import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.TicketValidationM
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.TicketValidationStatus;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 @Builder
 @Data
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "Ticket_validation")
 public class TicketValidation {
 
