@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -48,4 +50,6 @@ public class EventRequest {
     @NotNull(message = "Category ID is required")
     private Long categoryId;
 
+    @NotNull(message = "Atleast one ticket")
+    private List<TicketTypeRequest> ticketTypes = new ArrayList<>();
 }

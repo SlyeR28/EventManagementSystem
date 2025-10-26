@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Data
@@ -28,6 +29,7 @@ public class EventDto {
     private Long organizerId;
     private Long categoryId;
 
+    private List<TicketTypeDto> ticketTypes;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

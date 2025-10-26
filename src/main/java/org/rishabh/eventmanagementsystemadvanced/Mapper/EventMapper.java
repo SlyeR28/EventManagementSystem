@@ -16,16 +16,16 @@ public interface EventMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", expression = "java(org.rishabh.eventmanagementsystemadvanced.Domains.Modal.EventStatus.DRAFT)")
     @Mapping(target = "organizer", ignore = true) // We'll set it in service
-    @Mapping(target = "category", ignore = true)  // We'll set it in service
+    @Mapping(target = "category", ignore = true)// We'll set it in service
+    @Mapping(target = "ticketTypes", ignore = true) // set in service
     @Mapping(target = "attendees", ignore = true)
     @Mapping(target = "staff", ignore = true)
-    @Mapping(target = "ticketTypes", ignore = true)
     @Mapping(target = "images", ignore = true)
-    Event toEvent(EventRequest request);
+    Event toEntity(EventRequest request);
 
     // Convert Event entity to EventResponse DTO
     @Mapping(target = "organizerId", source = "organizer.id")
     @Mapping(target = "categoryId", source = "category.id")
-    EventDto toEventResponse(Event event);
+    EventDto toDto(Event event);
 
 }
