@@ -45,4 +45,7 @@ public class EventRequest {
     @NotNull(message = "Organizer ID is required")
     private Long organizerId;
 
+    @NotNull(message = "Category ID is required")
+    private Long categoryId;
+
 }

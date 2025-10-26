@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Exception.ImageException;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ImageInfo;
+import org.rishabh.eventmanagementsystemadvanced.Services.impl.ImageUrlGenerator;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -17,25 +18,39 @@ public abstract class ImageBase {
 
     private final Cloudinary cloudinary;
 
+
     protected ImageInfo upload(MultipartFile file , String folder){
         try{
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder", folder));
-            return new ImageInfo(
-                    (String)uploadResult.get("public_id"),
-                    (String)uploadResult.get("secured_url"),
-                    (String)uploadResult.get("format"),
-                    LocalDateTime.now()
-            );
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                    ObjectUtils.asMap("folder", folder));
+
+          String publicId = (String) uploadResult.get("public_id");
+          String secureUrl = (String) uploadResult.get("secure_url");
+          String optimizedUrl = (String) uploadResult.get("optimized_url");
+          String resizedUrl =  (String) uploadResult.get("resized_url");
+          String format = (String) uploadResult.get("format");
+          LocalDateTime uplaodedAt =  LocalDateTime.now();
+
+          return new  ImageInfo(
+                  publicId,
+                  secureUrl,
+                  optimizedUrl,
+                  resizedUrl,
+                  format,
+                  uplaodedAt
+          );
         }catch (IOException e){
-            throw new ImageException("Error uploading file");
+            throw new ImageException("Error uploading file" + e.getMessage());
         }
     }
 
-    protected void delete(String public_id){
+
+
+    protected void delete(String publicId){
         try{
-            cloudinary.uploader().destroy(public_id , ObjectUtils.emptyMap());
+            cloudinary.uploader().destroy(publicId , ObjectUtils.emptyMap());
         }catch ( IOException e){
-            throw new ImageException("Error deleting file");
+            throw new ImageException("Error deleting file" + e.getMessage());
         }
     }
 

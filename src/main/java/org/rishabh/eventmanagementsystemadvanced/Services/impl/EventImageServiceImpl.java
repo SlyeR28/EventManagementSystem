@@ -56,9 +56,7 @@ public class EventImageServiceImpl extends ImageBase implements EventImageServic
 
     @Override
     public List<ImageInfo> getEvetImages(Event event) {
-     return imageRepository.findByEventId(event.getId())
-             .stream().map(img -> new ImageInfo(img.getPublicId()
-                     , img.getSecuredUrl() , img.getFormat() , img.getUploadedAt())).toList();
+     return null;
     }
 
     @Override

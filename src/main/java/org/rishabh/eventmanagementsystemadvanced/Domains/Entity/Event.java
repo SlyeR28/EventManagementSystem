@@ -2,8 +2,6 @@ package org.rishabh.eventmanagementsystemadvanced.Domains.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.EventStatus;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;

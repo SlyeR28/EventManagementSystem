@@ -69,8 +69,8 @@ public class User {
     )
     private List<Event> staffingEvents = new ArrayList<>();
 
-    private String profilePictureUrl;
     private String publicId;
+
 
 
     @CreatedDate

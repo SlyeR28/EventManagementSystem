@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Security.Jwt.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -45,6 +46,7 @@ public class CustomSecuirtyConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/user/activation"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/user-image/**").permitAll() // public image GET
                         .requestMatchers("/api/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -63,7 +65,7 @@ public class CustomSecuirtyConfig {
     @Bean
     public AuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(new BCryptPasswordEncoder(14));
+        provider.setPasswordEncoder(passwordEncoder());
         provider.setUserDetailsService(userDetailsService);
         return provider;
     }
