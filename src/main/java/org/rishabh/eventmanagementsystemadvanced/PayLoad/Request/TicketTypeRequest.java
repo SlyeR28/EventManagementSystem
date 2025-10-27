@@ -19,11 +19,11 @@ public class TicketTypeRequest {
 
     @NotNull(message = "Price is required")
     @Min(value = 0, message = "Price must be greater than or equal to 0")
-    private Double price;
+    private Double basePrice;
 
-    @NotNull(message = "Total available tickets are required")
-    @Min(value = 1, message = "Total available must be at least 1")
-    private Integer totalAvailable;
+    @NotNull(message = "Total Quantity tickets are required")
+    @Min(value = 1, message = "Total Quantity must be at least 1")
+    private Integer totalQuantity;
 
     @NotNull(message = "Event id is required")
     private Long eventId;

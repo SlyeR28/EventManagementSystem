@@ -3,6 +3,7 @@ package org.rishabh.eventmanagementsystemadvanced.Domains.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.EventStatus;
+import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PricingStrategyType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -50,6 +51,11 @@ public class Event {
     @Column(name="Sales_end")
     private LocalDateTime salesEndTime;
 
+    // 🔸 Pricing Strategy
+    @Enumerated(EnumType.STRING)
+    @Column(name = "pricing_strategy")
+    private PricingStrategyType pricingStrategyType;
+
 
     //Relation with User as Organizer
     @ManyToOne(fetch = FetchType.LAZY)
@@ -88,4 +94,14 @@ public class Event {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+
+    public void addTicketType(TicketType type) {
+        ticketTypes.add(type);
+        type.setEvent(this);
+    }
+
+    public void removeTicketType(TicketType type) {
+        ticketTypes.remove(type);
+        type.setEvent(null);
+    }
 }

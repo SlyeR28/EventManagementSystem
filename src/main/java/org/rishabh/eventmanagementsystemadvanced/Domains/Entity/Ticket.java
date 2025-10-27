@@ -40,8 +40,13 @@ public class Ticket {
     private User purchaser;
 
 
+    @Column(name = "price_at_purchase", nullable = false)
+    private Double priceAtPurchase; // ✅ Store final sold price
+
+
     @OneToMany(mappedBy = "ticket" , cascade = CascadeType.ALL)
     private List<TicketValidation> validations =  new ArrayList<>();
+
 
 
 

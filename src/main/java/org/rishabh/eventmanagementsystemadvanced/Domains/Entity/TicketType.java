@@ -30,10 +30,17 @@ public class TicketType {
     private String name;
 
     @Column(nullable = false)
-    private Double price;
+    private Double  basePrice;
 
     @Column(nullable = false)
-    private Integer totalAvailable;
+    private Integer totalQuantity;
+
+    @Column(nullable = false)
+    private Integer remainingQuantity;
+
+
+    private Double currentPrice;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
@@ -50,4 +57,18 @@ public class TicketType {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+
+    //-------Utility Methods-----//
+
+    public void sellTicket(int quantity) {
+        if (remainingQuantity < quantity) {
+            throw new IllegalStateException("Not enough tickets available for " + name);
+        }
+        remainingQuantity -= quantity;
+    }
+
+
+    public void resetAvailability() {
+        this.remainingQuantity = this.totalQuantity;
+    }
 }

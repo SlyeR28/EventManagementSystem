@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PricingStrategyType;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ public class EventRequest {
 
     @NotNull(message = "End time is required")
     private LocalDateTime endTime;
+
+    private PricingStrategyType pricingStrategyType;
 
     @NotBlank(message = "Status is required")
     private String status; // convert to EventStatus enum in service

@@ -42,7 +42,7 @@ public class EventImageServiceImpl extends ImageBase implements EventImageServic
         // if event already has images -> delete from cloudinary and DB
         if(!event.getImages().isEmpty()){
                event.getImages().forEach(image-> delete(image.getPublicId()));
-               eventRepository.deleteAll(event.getImages());
+               imageRepository.deleteAll(event.getImages());
                event.getImages().clear();
            }
         // upload new images and save to dB
@@ -91,7 +91,7 @@ public class EventImageServiceImpl extends ImageBase implements EventImageServic
                 .orElseThrow(() -> new RuntimeException("Event not found" + eventId));
 
         event.getImages().forEach(image-> delete(image.getPublicId()));
-        eventRepository.deleteAll(event.getImages());
+        imageRepository.deleteAll(event.getImages());
         event.getImages().clear();
         eventRepository.save(event);
 
