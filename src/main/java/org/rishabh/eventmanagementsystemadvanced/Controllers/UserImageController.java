@@ -40,6 +40,4 @@ public class UserImageController {
         return ResponseEntity.ok("Image has been deleted successfully");
     }
 
-
-
 }

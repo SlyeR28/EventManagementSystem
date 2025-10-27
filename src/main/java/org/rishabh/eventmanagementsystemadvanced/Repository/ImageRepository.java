@@ -1,6 +1,8 @@
 package org.rishabh.eventmanagementsystemadvanced.Repository;
 
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Images;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -16,4 +18,6 @@ public interface ImageRepository extends JpaRepository<Images,Long> {
 
 
     List<Images> findAllByEvent_Id(Long eventId);
+
+    Page<Images> findByEventId(Long eventId, Pageable pageable);
 }

@@ -137,6 +137,8 @@ public class EventServiceImpl  implements EventService {
     }
 
 
+
+
     @Override
     public void autoUpdateEvent(Event event) {
         LocalDateTime now = LocalDateTime.now();
