@@ -1,5 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.TicketTypeDto;
@@ -20,13 +21,13 @@ public class TicketTypeController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<TicketTypeDto> createTicketType(@RequestBody TicketTypeRequest ticketTypeRequest) {
+    public ResponseEntity<TicketTypeDto> createTicketType(@Valid @RequestBody TicketTypeRequest ticketTypeRequest) {
         TicketTypeDto ticketType = ticketTypeService.createTicketType(ticketTypeRequest);
         return new ResponseEntity<>( ticketType,HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{tickettypeId}")
-    public ResponseEntity<TicketTypeDto> updateTicketType(@PathVariable long tickettypeId, @RequestBody TicketTypeRequest ticketTypeRequest) {
+    public ResponseEntity<TicketTypeDto> updateTicketType(@PathVariable long tickettypeId, @Valid @RequestBody TicketTypeRequest ticketTypeRequest) {
         TicketTypeDto ticketType = ticketTypeService.updateTicketType(tickettypeId, ticketTypeRequest);
         return new ResponseEntity<>(ticketType,HttpStatus.OK);
     }

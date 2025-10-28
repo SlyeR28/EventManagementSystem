@@ -1,4 +1,4 @@
-package org.rishabh.eventmanagementsystemadvanced.Services;
+package org.rishabh.eventmanagementsystemadvanced.Utils.DynamicPricingEngine;
 
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.TicketType;
 

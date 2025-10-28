@@ -1,5 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 
+
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Category;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Event;
@@ -13,6 +14,7 @@ import org.rishabh.eventmanagementsystemadvanced.Repository.EventRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.UserRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.EventService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class EventServiceImpl  implements EventService {
 
     private final EventRepository eventRepository;
@@ -46,6 +49,7 @@ public class EventServiceImpl  implements EventService {
          // set default event status = draft
          event.setStatus(EventStatus.DRAFT);
 
+
         Event saved = eventRepository.save(event);
 
         return eventMapper.toDto(saved);
@@ -69,6 +73,7 @@ public class EventServiceImpl  implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EventDto getEvent(Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found with id " + eventId));
@@ -76,6 +81,7 @@ public class EventServiceImpl  implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EventDto> getAllEvents() {
         List<Event> eventList = eventRepository.findAll();
         return eventList.stream().map(eventMapper::toDto).collect(Collectors.toList());
@@ -89,6 +95,7 @@ public class EventServiceImpl  implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EventDto> getEventsByOrganizerId(Long organizerId) {
         User organizer = userRepository.findById(organizerId).
                 orElseThrow(() -> new RuntimeException("User not found with id " + organizerId));
@@ -98,6 +105,7 @@ public class EventServiceImpl  implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EventDto> getEventsByCategoryId(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found with id " + categoryId));

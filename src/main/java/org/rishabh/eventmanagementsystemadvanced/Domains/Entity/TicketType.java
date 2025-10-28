@@ -71,4 +71,16 @@ public class TicketType {
     public void resetAvailability() {
         this.remainingQuantity = this.totalQuantity;
     }
+
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDateTime.now();
+        if (remainingQuantity == 0) remainingQuantity = totalQuantity;
+        if (currentPrice == 0) currentPrice = basePrice;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

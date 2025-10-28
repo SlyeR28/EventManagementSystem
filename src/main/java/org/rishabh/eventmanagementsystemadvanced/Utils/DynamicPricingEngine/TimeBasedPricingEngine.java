@@ -1,7 +1,6 @@
-package org.rishabh.eventmanagementsystemadvanced.Services.impl;
+package org.rishabh.eventmanagementsystemadvanced.Utils.DynamicPricingEngine;
 
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.TicketType;
-import org.rishabh.eventmanagementsystemadvanced.Services.DynamicPriceEngine;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;

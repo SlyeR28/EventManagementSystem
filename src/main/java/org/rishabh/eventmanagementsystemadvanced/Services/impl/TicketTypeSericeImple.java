@@ -1,7 +1,7 @@
 package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 
 
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Event;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.TicketType;
@@ -12,6 +12,7 @@ import org.rishabh.eventmanagementsystemadvanced.Repository.EventRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.TicketTypeRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.TicketTypeService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +32,13 @@ public class TicketTypeSericeImple implements TicketTypeService {
                 orElseThrow(() -> new RuntimeException("Event id not found"));
 
         TicketType ticketTypeEntity = ticketTypeMapper.toEntity(ticketTypeRequest);
-        ticketTypeEntity.setEvent(event);
+        // initialize price & qty if not set by mapper
+        ticketTypeEntity.setCurrentPrice(ticketTypeEntity.getCurrentPrice());
+        ticketTypeEntity.setRemainingQuantity(ticketTypeEntity.getTotalQuantity());
+
+        // maintain both sides
+        event.addTicketType(ticketTypeEntity);
+
         TicketType saved = ticketTypeRepository.save(ticketTypeEntity);
         return ticketTypeMapper.toResponse(saved);
 
@@ -39,14 +46,20 @@ public class TicketTypeSericeImple implements TicketTypeService {
 
     @Override
     public TicketTypeDto updateTicketType(Long id, TicketTypeRequest ticketTypeRequest) {
-        TicketType ticketType = ticketTypeRepository.findById(id).orElseThrow(() -> new RuntimeException("Ticket id not found"));
-        TicketType entity = ticketTypeMapper.toEntity(ticketTypeRequest);
-        TicketType saved = ticketTypeRepository.save(entity);
-        saved.setEvent(ticketType.getEvent());
-        return ticketTypeMapper.toResponse(saved);
+        TicketType existing = ticketTypeRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("Ticket id not found"));
+        // update only mutable fields
+        existing.setName(ticketTypeRequest.getName());
+        existing.setBasePrice(ticketTypeRequest.getBasePrice());
+        existing.setTotalQuantity(ticketTypeRequest.getTotalQuantity());
+
+        TicketType updated = ticketTypeRepository.save(existing);
+
+        return ticketTypeMapper.toResponse(updated);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TicketTypeDto> getAllTicketTypesByEventId(Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event id not found"));
         List<TicketType> byEventId = ticketTypeRepository.findByEventId(event.getId());
@@ -54,12 +67,14 @@ public class TicketTypeSericeImple implements TicketTypeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TicketTypeDto> getAllTicketTypes() {
         List<TicketType> all = ticketTypeRepository.findAll();
      return  all.stream().map(ticketTypeMapper::toResponse).collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TicketTypeDto getTicketTypeById(Long id) {
         TicketType ticketType = ticketTypeRepository.findById(id).orElseThrow(() -> new RuntimeException("Ticket id not found"));
         return ticketTypeMapper.toResponse(ticketType);
@@ -68,6 +83,10 @@ public class TicketTypeSericeImple implements TicketTypeService {
     @Override
     public void deleteTicketType(Long id) {
         TicketType ticketType = ticketTypeRepository.findById(id).orElseThrow(() -> new RuntimeException("Ticket id not found"));
+        Event event = ticketType.getEvent();
+        if (event != null) {
+            event.removeTicketType(ticketType);
+        }
         ticketTypeRepository.delete(ticketType);
 
     }
