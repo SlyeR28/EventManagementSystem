@@ -3,8 +3,8 @@ package org.rishabh.eventmanagementsystemadvanced.Utils.DynamicPricingEngine;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@Component
-@RequiredArgsConstructor
+//@Component
+//@RequiredArgsConstructor
 public class DynamicPricingFactory {
 
 //    private final Map<String , DynamicPriceEngine> strategies;

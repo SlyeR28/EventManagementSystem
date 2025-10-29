@@ -1,5 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.Role;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
@@ -21,7 +22,7 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto>registerUser(@RequestBody UserRequest user){
+    public ResponseEntity<UserDto>registerUser( @Valid @RequestBody UserRequest user){
         UserDto user1 = userService.createUser(user);
         return  ResponseEntity.ok(user1);
     }

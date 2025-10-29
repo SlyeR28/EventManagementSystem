@@ -2,8 +2,8 @@ package org.rishabh.eventmanagementsystemadvanced.Utils.DynamicPricingEngine;
 
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.TicketType;
 import org.springframework.stereotype.Component;
-
-@Component("demandBased")
+//
+//@Component("demandBased")
 public class DemandBasedPricingEngine implements DynamicPriceEngine {
 
     @Override

@@ -8,6 +8,7 @@ import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.CategoryRequest
 import org.rishabh.eventmanagementsystemadvanced.Repository.CategoryRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.CategoryService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public CategoryDto updateCategory(Long id, CategoryRequest categoryRequest) {
         Category category = categoryRepository.findById(id).
                 orElseThrow(() -> new RuntimeException("Category not found with id " + id));
@@ -37,12 +39,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CategoryDto> getAllCategories() {
         List<Category> all = categoryRepository.findAll();
         return all.stream().map(categoryMapper::toDto).collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CategoryDto getCategory(Long id) {
         Category category = categoryRepository.findById(id).
                 orElseThrow(() -> new RuntimeException("Category not found with id " + id));

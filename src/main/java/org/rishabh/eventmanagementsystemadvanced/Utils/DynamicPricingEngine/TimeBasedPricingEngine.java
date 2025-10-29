@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-@Component("timeBased")
+//@Component("timeBased")
 public class TimeBasedPricingEngine implements DynamicPriceEngine {
 
     @Override
@@ -18,9 +18,9 @@ public class TimeBasedPricingEngine implements DynamicPriceEngine {
         long hoursLeft = java.time.Duration.between(LocalDateTime.now(), eventStart).toHours();
 
         if(hoursLeft >= 24){
-            ticketType.setPrice(ticketType.getPrice() * 1.50);
+
         }else if(hoursLeft >= 6){
-            ticketType.setPrice(ticketType.getPrice() * 10.0);
+
         }
     }
 }
