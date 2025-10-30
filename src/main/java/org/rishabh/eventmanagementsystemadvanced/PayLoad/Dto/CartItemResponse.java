@@ -11,8 +11,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class CartItemResponse {
-    private Long ticketTypeId;
+
+    private Long cartItemId;
+    private Long eventId;
     private String eventName;
+    private Long ticketTypeId;
+    private String ticketTypeName;
+    private double ticketPrice;
     private int quantity;
-    private double price;
+    private double totalPrice;
 }

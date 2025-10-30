@@ -8,25 +8,22 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CartItem {
+public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    private Event event;
+    private Order order;
 
     @ManyToOne
-    private TicketType  ticketType;
+    private TicketType ticketType;
 
-    private int quantity;
+    private Integer quantity;
 
-    private double price;
-
-    @ManyToOne
-    private Cart cart;
+    private Double price;
 }

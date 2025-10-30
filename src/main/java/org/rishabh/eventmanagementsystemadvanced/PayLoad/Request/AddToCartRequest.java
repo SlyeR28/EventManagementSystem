@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 
 public class AddToCartRequest  {
 
+    @NotNull(message = "Event must be required")
+    private Long eventId;
 
     @NotNull(message = "TicketTypeId cannot be null")
     private Long ticketTypeId;
