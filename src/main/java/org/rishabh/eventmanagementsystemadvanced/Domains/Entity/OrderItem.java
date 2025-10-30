@@ -6,11 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class OrderItem {
 
     @Id
@@ -20,10 +22,14 @@ public class OrderItem {
     @ManyToOne
     private Order order;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Event event;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     private TicketType ticketType;
 
     private Integer quantity;
 
     private Double price;
+
 }

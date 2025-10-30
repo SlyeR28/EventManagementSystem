@@ -16,12 +16,7 @@ public class CartController {
 
     private final CartService cartService;
 
-    @PostMapping("/add/{userId}")
-    public ResponseEntity<CartResponse> addToCart(@PathVariable Long userId
-            , @Valid @RequestBody AddToCartRequest addToCartRequest) {
-        CartResponse toCart = cartService.addToCart(userId, addToCartRequest);
-        return ResponseEntity.ok(toCart);
-    }
+
 
     @GetMapping("/view/{userId}")
     public ResponseEntity<CartResponse> viewCart(@PathVariable Long userId) {
@@ -29,12 +24,6 @@ public class CartController {
         return ResponseEntity.ok(toCart);
     }
 
-    @DeleteMapping("/{userId}/remove/{itemId}")
-    public ResponseEntity<CartResponse> removeFromCart(@PathVariable Long userId
-            , @PathVariable Long itemId) {
-        CartResponse removeItem = cartService.removeItem(userId, itemId);
-        return ResponseEntity.ok(removeItem);
-    }
 
     @DeleteMapping("/{userId}/clear")
     public ResponseEntity<ApiResponse> clearCart(@PathVariable Long userId) {

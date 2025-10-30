@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.OrderStatus;
-import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PaymentStatus;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,21 +24,19 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private User user;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderItem> orderItems;
 
     private double totalAmount;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    @Enumerated(EnumType.STRING)
-    private PaymentStatus paymentStatus;
-
     private LocalDateTime createdAt;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems;
+
 
 }
 
