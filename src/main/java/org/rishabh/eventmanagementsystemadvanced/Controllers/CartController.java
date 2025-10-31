@@ -1,10 +1,8 @@
 package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.CartResponse;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.AddToCartRequest;
 import org.rishabh.eventmanagementsystemadvanced.Services.CartService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

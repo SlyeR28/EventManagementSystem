@@ -27,14 +27,14 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ticket_type_id")
-    private TicketType ticketType;
-
-
     @Column(name = "status" , nullable = false)
     @Enumerated(EnumType.STRING)
     private TicketStatus status;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ticket_type_id")
+    private TicketType ticketType;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,12 +42,15 @@ public class Ticket {
     private User purchaser;
 
 
+    @OneToMany(mappedBy = "ticket" , cascade = CascadeType.ALL)
+    private List<TicketValidation> validations =  new ArrayList<>();
+
+
+
     @Column(name = "price_at_purchase", nullable = false)
     private Double priceAtPurchase; // ✅ Store final sold price
 
 
-    @OneToMany(mappedBy = "ticket" , cascade = CascadeType.ALL)
-    private List<TicketValidation> validations =  new ArrayList<>();
 
     private LocalDateTime purchasedAt;
 

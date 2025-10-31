@@ -8,7 +8,6 @@ import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.OrderStatus;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.OrderMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.OrderResponse;
 import org.rishabh.eventmanagementsystemadvanced.Repository.CartRepository;
-import org.rishabh.eventmanagementsystemadvanced.Repository.OrderItemRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.OrderRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.OrderService;
 import org.springframework.stereotype.Service;
@@ -70,11 +69,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderResponse> getUserOrders(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("cart not found"));
-        if(cart.getItems().isEmpty()) {
-            throw new RuntimeException("cart items not found");
-        }
-        List<Order> orderList = orderRepository.findByUserId(cart.getUser().getId());
+        List<Order> orderList = orderRepository.findByUserId(userId);
         return orderList.stream().map(orderMapper::toResponse).collect(Collectors.toList());
 
     }

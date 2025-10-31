@@ -138,14 +138,14 @@
         <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>core</artifactId>
-            <version>3.5.3</version>
+            <version>3.5.2</version>
         </dependency>
-<!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.google.zxing/zxing-javase &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.google.zxing</groupId>-->
-<!--            <artifactId>zxing-javase</artifactId>-->
-<!--            <version>1.7</version>-->
-<!--        </dependency>-->
+
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.5.2</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.itextpdf/itextpdf -->
         <dependency>
             <groupId>com.itextpdf</groupId>

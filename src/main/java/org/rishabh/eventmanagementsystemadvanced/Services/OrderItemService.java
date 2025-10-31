@@ -1,21 +1,21 @@
 package org.rishabh.eventmanagementsystemadvanced.Services;
 
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.OrderItemResponse;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.OrderItemRequest;
+import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.OrderItem;
 
 import java.util.List;
 
 public interface OrderItemService {
 
-    // Add an item to an existing order
-    OrderItemResponse addItem(Long orderId, OrderItemRequest request);
+
+    void saveAll(List<OrderItem> orderItemList);
 
     // Get all items of an order
-    List<OrderItemResponse> getItemsByOrderId(Long orderId);
+    List<OrderItem> getItemsByOrderId(Long orderId);
 
-    // Remove a single item
-    void removeItem(Long orderItemId);
+    // Get all items sold for a specific event (optional but useful for analytics)
+    List<OrderItem> getItemsByEventId(Long eventId);
 
-    // Update quantity or details of an order item
-    OrderItemResponse updateItem(Long orderItemId, OrderItemRequest request);
+    void deleteByOrderId(Long orderId);
+
+
 }
