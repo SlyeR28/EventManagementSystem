@@ -51,9 +51,10 @@ public class Ticket {
     private Double priceAtPurchase; // ✅ Store final sold price
 
 
+    @Column(name = "qr_code_url")
+    private String qrCodeUrl;
 
     private LocalDateTime purchasedAt;
-
 
 
 

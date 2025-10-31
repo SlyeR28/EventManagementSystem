@@ -1,7 +1,7 @@
 package org.rishabh.eventmanagementsystemadvanced.Domains.Modal;
 
 public enum Role {
-    ADMIN,
+   ADMIN,
     STAFF,
     ORGANIZER,
     ATTENDEE
