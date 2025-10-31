@@ -38,13 +38,13 @@ public class EventRequest {
 
     private PricingStrategyType pricingStrategyType;
 
-    @NotBlank(message = "Status is required")
+
     private String status; // convert to EventStatus enum in service
 
-    @NotNull(message = "Sales start time is required")
+
     private LocalDateTime salesStartTime;
 
-    @NotNull(message = "Sales end time is required")
+
     private LocalDateTime salesEndTime;
 
     @NotNull(message = "Organizer ID is required")
@@ -53,6 +53,6 @@ public class EventRequest {
     @NotNull(message = "Category ID is required")
     private Long categoryId;
 
-    @NotNull(message = "Atleast one ticket")
+
     private List<TicketTypeRequest> ticketTypes = new ArrayList<>();
 }

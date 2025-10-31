@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Transactional
 @Service
 public class EventImageServiceImpl extends ImageBase implements EventImageService {
 
@@ -40,35 +41,39 @@ public class EventImageServiceImpl extends ImageBase implements EventImageServic
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found" + eventId));
         // if event already has images -> delete from cloudinary and DB
-        if(!event.getImages().isEmpty()){
+        if(event.getImages() != null && !event.getImages().isEmpty()){
                event.getImages().forEach(image-> delete(image.getPublicId()));
                imageRepository.deleteAll(event.getImages());
                event.getImages().clear();
            }
-        // upload new images and save to dB
-        List<ImageInfo> uploadedImages = files.stream().map(file -> {
-              ImageInfo imageInfo = upload(file , "eventImage"+ eventId);
-            Images eventImage = Images.builder()
-                    .publicId(imageInfo.publicId())
-                    .securedUrl(imageInfo.securedUrl())
-                    .format(imageInfo.format())
-                    .uploadedAt(imageInfo.uploadedAt())
-                    .event(event)
-                    .build();
-            imageRepository.save(eventImage);
-            return imageInfo;
-        }).collect(Collectors.toList());
-        event.getImages().addAll(uploadedImages.stream().map((img->
-                Images.builder()
-                        .publicId(img.publicId())
-                        .securedUrl(img.securedUrl())
-                        .format(img.format())
-                        .uploadedAt(img.uploadedAt())
-                        .event(event)
-                        .build())
-                        ).collect(Collectors.toSet()));
+        // Upload new images
+        List<Images> uploadedImages = files.stream()
+                .map(file -> {
+                    ImageInfo info = upload(file, "eventImage" + eventId);
+                    return Images.builder()
+                            .publicId(info.publicId())
+                            .securedUrl(info.securedUrl())
+                            .format(info.format())
+                            .uploadedAt(info.uploadedAt())
+                            .event(event)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        imageRepository.saveAll(uploadedImages);
+        event.getImages().addAll(uploadedImages);
+
         eventRepository.save(event);
-        return uploadedImages;
+
+        // Return ImageInfo list for API response
+        return uploadedImages.stream()
+                .map(img -> new ImageInfo(
+                        img.getPublicId(),
+                        img.getSecuredUrl(),
+                        img.getFormat(),
+                        img.getUploadedAt()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override

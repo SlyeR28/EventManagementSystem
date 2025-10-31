@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/event-image")
+@RequestMapping("/api/event-image")
 @RequiredArgsConstructor
 public class EventImageController {
 

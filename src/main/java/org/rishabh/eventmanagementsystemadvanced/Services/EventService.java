@@ -32,5 +32,6 @@ public interface EventService {
 
     void autoUpdateEvent(Event event);
 
+    EventDto startTicketSales(Long eventId, LocalDateTime start, LocalDateTime end);
 
 }

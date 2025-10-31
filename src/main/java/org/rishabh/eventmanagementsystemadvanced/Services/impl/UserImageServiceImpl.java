@@ -92,7 +92,6 @@ public class UserImageServiceImpl extends ImageBase implements UserImageService 
             delete(user.getProfileImage().getPublicId());
             imageRepository.delete(user.getProfileImage());
             user.setProfileImage(null);
-            user.setPublicId(null);
             userRepository.save(user);
         }else {
             throw new UserNotFoundException("User Not Found " + userId);

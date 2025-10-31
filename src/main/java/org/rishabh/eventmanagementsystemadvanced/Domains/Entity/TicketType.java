@@ -19,7 +19,7 @@ import java.util.List;
 @Data
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-@Table(name = "Tcket_type")
+@Table(name = "Ticket_type")
 public class TicketType {
 
     @Id
@@ -75,9 +75,16 @@ public class TicketType {
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
-        if (remainingQuantity == 0) remainingQuantity = totalQuantity;
-        if (currentPrice == 0) currentPrice = basePrice;
+
+        if (remainingQuantity == null || remainingQuantity == 0) {
+            remainingQuantity = totalQuantity;
+        }
+
+        if (currentPrice == null || currentPrice == 0) {
+            currentPrice = basePrice;
+        }
     }
+
 
     @PreUpdate
     public void preUpdate() {

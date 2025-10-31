@@ -69,11 +69,6 @@ public class User {
     )
     private List<Event> staffingEvents = new ArrayList<>();
 
-    private String publicId;
-
-
-
-
 
     @CreatedDate
     @Column(updatable = false)

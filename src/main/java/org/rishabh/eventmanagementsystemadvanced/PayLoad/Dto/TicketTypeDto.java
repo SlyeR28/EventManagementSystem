@@ -14,8 +14,10 @@ import java.time.LocalDateTime;
 public class TicketTypeDto {
     private Long id;
     private String name;
-    private Double price;
-    private Integer totalAvailable;
+    private Double basePrice;
+    private Integer totalQuantity;
+    private Integer remainingQuantity;
+    private Double currentPrice;
     private Long eventId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

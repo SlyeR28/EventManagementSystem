@@ -30,5 +30,4 @@ public class UserRequest {
 
     private Role role; // Optional, default will be USER
 
-    private String imageUrl; // Optional
 }

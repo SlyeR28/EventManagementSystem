@@ -6,6 +6,7 @@ import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.EventStatus;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.EventDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.EventRequest;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.SalesTimeRequest;
 import org.rishabh.eventmanagementsystemadvanced.Services.EventService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -103,7 +104,12 @@ public class EventController {
         return ResponseEntity.ok(response);
     }
 
-
-
+    @PutMapping("/{id}/sales-time")
+    public ResponseEntity<EventDto> updateSalesTime(
+            @PathVariable Long id,
+            @RequestBody SalesTimeRequest request) {
+        EventDto response = eventService.startTicketSales(id, request.getSalesStartTime(), request.getSalesEndTime());
+        return ResponseEntity.ok(response);
+    }
 
 }
