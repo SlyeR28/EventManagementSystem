@@ -19,18 +19,20 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/event")
-@PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
+
 public class EventController {
 
 
     private final EventService eventService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     @PostMapping("/create")
     public ResponseEntity<EventDto>createEvent(@Valid @RequestBody EventRequest eventRequest) {
         EventDto createdEvent = eventService.crateEvent(eventRequest);
         return  new  ResponseEntity<>(createdEvent, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     @PutMapping("/update/{eventId}")
     public ResponseEntity<EventDto>updateEvent(@Valid
                                                 @PathVariable Long eventId,
@@ -50,7 +52,7 @@ public class EventController {
         List<EventDto> allEvents = eventService.getAllEvents();
         return ResponseEntity.ok(allEvents);
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     @GetMapping("/organizer/{organizerId}")
     public ResponseEntity<List<EventDto>>getAllOrganizerEvents(@PathVariable Long organizerId) {
         List<EventDto> eventsByOrganizerId = eventService.getEventsByOrganizerId(organizerId);
@@ -62,7 +64,7 @@ public class EventController {
         List<EventDto> eventsByOrganizerId = eventService.getEventsByCategoryId(categoryId);
         return ResponseEntity.ok(eventsByOrganizerId);
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     @DeleteMapping("/del/{eventId}")
     public ResponseEntity<ApiResponse>deleteEvent(@PathVariable Long eventId) {
         eventService.deleteEvent(eventId);

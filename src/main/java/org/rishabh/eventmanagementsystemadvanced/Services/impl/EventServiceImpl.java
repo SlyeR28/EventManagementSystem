@@ -149,8 +149,8 @@ public class EventServiceImpl  implements EventService {
     public EventDto startTicketSales(Long eventId, LocalDateTime start, LocalDateTime end) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found: " + eventId));
-        event.setStartTime(start);
-        event.setEndTime(end);
+        event.setSalesStartTime(start);
+        event.setSalesEndTime(end);
         eventRepository.save(event);
         return eventMapper.toDto(event);
     }
