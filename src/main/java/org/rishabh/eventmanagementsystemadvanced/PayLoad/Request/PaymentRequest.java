@@ -7,5 +7,8 @@ import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PaymentMethod;
 public class PaymentRequest {
 
     private Long orderId;
-    private PaymentMethod paymentMethod;
+    private Double amount; // in major currency units (e.g., INR)
+    private String currency; // e.g., "INR"
+    private String description;
+    private String email;
 }
