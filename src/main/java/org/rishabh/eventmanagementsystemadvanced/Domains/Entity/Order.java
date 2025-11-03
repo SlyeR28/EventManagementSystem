@@ -30,6 +30,7 @@ public class Order {
     private double totalAmount;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 150, nullable = false)
     private OrderStatus status;
 
     private LocalDateTime createdAt;

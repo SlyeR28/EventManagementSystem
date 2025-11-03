@@ -1,7 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.PayLoad.Request;
 
 import lombok.Data;
-import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PaymentMethod;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PaymentProviders;
 
 @Data

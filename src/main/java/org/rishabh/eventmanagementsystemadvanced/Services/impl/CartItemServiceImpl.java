@@ -117,7 +117,13 @@ public class CartItemServiceImpl implements CartItemService {
             throw new IllegalStateException("User not found");
         }
         cart.getItems().remove(cartItem);
-        cartItemRepository.save(cartItem);
+        cartItemRepository.delete(cartItem);
+
+        double total = cart.getItems().stream()
+                .mapToDouble(CartItem::getPrice)
+                .sum();
+        cart.setTotalPrice(total);
+
         Cart saved = cartRepository.save(cart);
        return cartMapper.toCartResponse(saved);
     }

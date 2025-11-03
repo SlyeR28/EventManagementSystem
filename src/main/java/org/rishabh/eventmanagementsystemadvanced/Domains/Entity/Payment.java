@@ -30,15 +30,18 @@ public class Payment {
     private double amount;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 100 , nullable = false)
    private PaymentStatus paymentStatus;
 
     @Column(unique = true)
     private String transactionId;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 100)
     private PaymentMethod paymentMethod;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 100 , nullable = false)
     private PaymentProviders paymentProviders;
 
     private LocalDateTime paymentDate;
