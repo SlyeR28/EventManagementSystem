@@ -2,6 +2,7 @@ package org.rishabh.eventmanagementsystemadvanced.PayLoad.Request;
 
 import lombok.Data;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PaymentMethod;
+import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PaymentProviders;
 
 @Data
 public class PaymentRequest {
@@ -11,4 +12,5 @@ public class PaymentRequest {
     private String currency; // e.g., "INR"
     private String description;
     private String email;
+    private PaymentProviders  paymentProviders;
 }

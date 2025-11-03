@@ -20,7 +20,6 @@ public interface TicketMapper {
 
     @Mapping(source = "ticketType.name", target = "ticketTypeName")
     @Mapping(source = "purchaser.fullName", target = "purchaserName")
-    @Mapping(source = "validations", target = "validations", qualifiedByName = "mapValidations")
     TicketResponse toResponse(Ticket ticket);
 
 

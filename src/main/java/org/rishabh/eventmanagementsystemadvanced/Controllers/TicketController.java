@@ -18,19 +18,12 @@ public class TicketController {
    private final TicketService ticketService;
 
     // ✅ Create Ticket (after order or payment)
-    @PostMapping
-    public ResponseEntity<TicketResponse> createTicket(@RequestBody TicketRequest request) {
-        return ResponseEntity.ok(ticketService.createTicket(request));
+    @PostMapping("/generate/{orderId}")
+    public ResponseEntity<List<TicketResponse>> createTicket(@PathVariable Long orderId) {
+        List<TicketResponse> generateTickets = ticketService.generateTickets(orderId);
+        return ResponseEntity.ok(generateTickets);
     }
 
-    // ✅ Validate Ticket (QR_CODE, MANUAL, NFC_SCAN)
-    @PostMapping("/{id}/validate")
-    public ResponseEntity<TicketResponse> validateTicket(
-            @PathVariable Long id,
-            @RequestParam TicketValidationMethod method
-    ) {
-        return ResponseEntity.ok(ticketService.validateTicket(id, method));
-    }
 
     // ✅ Fetch Ticket by ID
     @GetMapping("/{id}")

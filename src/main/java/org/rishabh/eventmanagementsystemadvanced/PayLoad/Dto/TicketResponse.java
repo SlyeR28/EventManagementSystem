@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.TicketStatus;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
@@ -17,10 +16,11 @@ public class TicketResponse {
 
      private Long id;
     private String ticketTypeName;
-    private Double priceAtPurchase;
+    private String eventName;
     private String purchaserName;
     private TicketStatus status;
+    private Double priceAtPurchase;
     private String qrCodeUrl;
     private LocalDateTime purchasedAt;
-    private List<ValidationResponse> validations;
+
 }

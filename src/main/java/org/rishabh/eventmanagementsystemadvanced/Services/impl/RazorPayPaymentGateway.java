@@ -1,10 +1,12 @@
 package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 
 import com.razorpay.Order;
+import com.razorpay.Payment;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.SignatureUtils;
 import org.json.JSONObject;
 import org.rishabh.eventmanagementsystemadvanced.Config.RazorPayConfig;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PaymentProviders;
@@ -14,7 +16,9 @@ import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PaymentRefundRespon
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PaymentResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.PaymentRequest;
 import org.rishabh.eventmanagementsystemadvanced.Services.PaymentGateWay;
+import org.rishabh.eventmanagementsystemadvanced.Utils.SignatureUtil;
 import org.springframework.stereotype.Service;
+
 import java.util.Map;
 
 @Service("razorpay")
@@ -57,7 +61,14 @@ public class RazorPayPaymentGateway implements PaymentGateWay {
 
     @Override
     public PayamentVerficationResponse verifyPayment(Long orderId, Long paymentId) {
-        return null;
+       try{
+           Payment rzpPayment = razorpayClient.payments.fetch(paymentId.toString());
+           String status = rzpPayment.get("status");
+           boolean success = "captured".equalsIgnoreCase(status) || "authorized".equalsIgnoreCase(status);
+           return new PayamentVerficationResponse(success , status);
+       } catch (RazorpayException e) {
+           return new PayamentVerficationResponse(false , "ERROR");
+       }
     }
 
     @Override
@@ -67,6 +78,13 @@ public class RazorPayPaymentGateway implements PaymentGateWay {
 
     @Override
     public void handleWebhook(String payload, Map<String, String> headers) {
+        String signature = headers.getOrDefault("x-razorPay-signature", headers.get("x-razorPay-signature"));
+        String secret = razorPayConfig.getSecret();
+        boolean verifySignature = SignatureUtil.verifyRazorPaySignature(payload, signature, secret);
+        if(!verifySignature){
+            throw new RuntimeException("Invalid payment signature");
+        }
+        System.out.println("RazorPay webhook validated:.." +payload);
 
     }
 }
