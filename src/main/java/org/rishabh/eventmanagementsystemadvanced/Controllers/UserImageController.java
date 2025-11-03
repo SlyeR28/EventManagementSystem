@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("api/user-image")
+@RequestMapping("/api/user-image")
 @RequiredArgsConstructor
 public class UserImageController {
 

@@ -1,9 +1,7 @@
 package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.TicketValidationMethod;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.TicketResponse;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.TicketRequest;
 import org.rishabh.eventmanagementsystemadvanced.Services.TicketService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
