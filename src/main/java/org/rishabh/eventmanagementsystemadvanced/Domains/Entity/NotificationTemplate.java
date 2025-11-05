@@ -1,15 +1,17 @@
 package org.rishabh.eventmanagementsystemadvanced.Domains.Entity;
 
 
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.ChannelType;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "notification_templates")
+
+
+@Entity
+@Table(name = "notification_templates")
 @Data
 @Builder
 @AllArgsConstructor
@@ -17,9 +19,19 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class NotificationTemplate {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
     private String code;
+
+    @Column(nullable = false)
     private String subject;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String body;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ChannelType channel;
 }

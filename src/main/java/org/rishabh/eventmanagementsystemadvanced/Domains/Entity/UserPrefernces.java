@@ -18,7 +18,8 @@ public class UserPrefernces {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long userId; // FK -> users.id
+
+    private Long userId;
     private boolean emailEnabled = true;
     private boolean popupEnabled = true;
 

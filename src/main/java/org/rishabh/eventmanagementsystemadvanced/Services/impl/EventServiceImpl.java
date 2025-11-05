@@ -16,6 +16,7 @@ import org.rishabh.eventmanagementsystemadvanced.Repository.UserRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.EventService;
 import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.DomainEventPublisher;
 import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventDraftCreatedEvent;
+import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.TicketSalesStartedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,7 +57,7 @@ public class EventServiceImpl implements EventService {
 
         // ✅ Publish event for Notification listener
         domainEventPublisher.publish(
-                new EventDraftCreatedEvent(this, saved.getId(), saved.getName())
+                new EventDraftCreatedEvent(this, saved.getId(), saved.getName(), EventStatus.DRAFT)
         );
 
         return eventMapper.toDto(saved);
@@ -147,7 +148,9 @@ public class EventServiceImpl implements EventService {
         event.setStatus(EventStatus.PUBLISHED);
         Event saved = eventRepository.save(event);
         //Notification for event has been published
-        domainEventPublisher.publish(new (this , ))
+        domainEventPublisher.publish(
+                new EventDraftCreatedEvent(this, saved.getId(), saved.getName(), EventStatus.PUBLISHED)
+        );
         return eventMapper.toDto(saved);
     }
 
@@ -162,7 +165,13 @@ public class EventServiceImpl implements EventService {
 
         event.setStartTime(request.getSalesStartTime());
         event.setEndTime(request.getSalesEndTime());
-        event.setStatus(EventStatus.RESCHEDULED);
+        event.setStatus(EventStatus.PUBLISHED);
+
+        // notification for ticket sales are live
+        domainEventPublisher.publish(
+                new TicketSalesStartedEvent(this ,eventId , event.getName())
+        );
+
         return eventMapper.toDto(eventRepository.save(event));
     }
 

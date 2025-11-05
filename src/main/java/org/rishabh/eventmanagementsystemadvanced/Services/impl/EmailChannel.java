@@ -5,7 +5,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.User;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.ChannelType;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.NotficationRequest;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.NotificationRequest;
 import org.rishabh.eventmanagementsystemadvanced.Repository.UserRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.NotificationChannel;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -26,7 +26,7 @@ public class EmailChannel implements NotificationChannel {
     }
 
     @Override
-    public void send(NotficationRequest req) {
+    public void send(NotificationRequest req) {
 
         String email = req.getUserEmail();
 

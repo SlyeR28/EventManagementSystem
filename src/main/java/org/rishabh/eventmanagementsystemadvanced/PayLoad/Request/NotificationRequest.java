@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NotficationRequest
+public class NotificationRequest
 {
-    Long userId;
-    String userEmail;
-    String subject;
-     String message;
-     String templateCode;
+    private Long userId;
+    private String userEmail;
+    private String subject;
+    private String message;
+    private String templateCode;
 }

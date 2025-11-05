@@ -23,12 +23,13 @@ public class SimpleTemplateService  implements TemplateService {
 
     @Override
     public String render(String template, Map<String, Object> vars) {
-        String out = template;
-        if (out == null) return "";
-        if (vars == null || vars.isEmpty()) return out;
-        for(var e : vars.entrySet()) {
-            out.replace("{" + e.getKey() + "}", String.valueOf(e.getValue()));
+        if (template == null) return "";
+        if (vars == null || vars.isEmpty()) return template;
+
+        String result = template;
+        for (var entry : vars.entrySet()) {
+            result = result.replace("{{" + entry.getKey() + "}}", String.valueOf(entry.getValue()));
         }
-        return out;
+        return result;
     }
 }

@@ -17,7 +17,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
     Optional<User> findByActivationCode(String activationCode);
     Page<User>findByRole(Role role, Pageable pageable);
 
-    List<User> findByRoleIn(List<String> roles);
+    Page<User> findByRoleIn(List<String> roles, Pageable pageable);
 
 
     @Query("SELECT u FROM User u WHERE u.id NOT IN (SELECT t.id FROM Ticket t WHERE t.id = :eventId)")
