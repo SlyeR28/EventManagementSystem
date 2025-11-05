@@ -2,6 +2,7 @@ package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.Role;
+import org.rishabh.eventmanagementsystemadvanced.Security.Services.CustomUserDetails;
 import org.springframework.data.domain.*;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.User;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.UserMapper;
@@ -104,11 +105,12 @@ public class UserSerivceImpl implements UserService {
     }
 
 
-    //helper method to find current user
+    @Override
     public User getCurrentUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return userRepository.findByEmail(authentication.getName()).orElseThrow(
                 () -> new UsernameNotFoundException("User not found with email " + authentication.getName()));
     }
+
 
 }

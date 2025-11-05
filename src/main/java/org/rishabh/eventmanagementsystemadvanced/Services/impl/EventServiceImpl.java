@@ -1,18 +1,21 @@
 package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 
-
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Category;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Event;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.User;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.EventStatus;
+import org.rishabh.eventmanagementsystemadvanced.Exception.*;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.EventMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.EventDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.EventRequest;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.SalesTimeRequest;
 import org.rishabh.eventmanagementsystemadvanced.Repository.CategoryRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.EventRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.UserRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.EventService;
+import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.DomainEventPublisher;
+import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventDraftCreatedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,149 +26,156 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 @Transactional
-public class EventServiceImpl  implements EventService {
+public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final EventMapper eventMapper;
+    private final DomainEventPublisher domainEventPublisher;
 
 
     @Override
-    public EventDto crateEvent(EventRequest eventRequest) {
+    public EventDto createEvent(Long organizerId, EventRequest eventRequest) {
 
-        //Fetch Organizer
-        User organizer = userRepository.findById(eventRequest.getOrganizerId()).
-                orElseThrow(() -> new RuntimeException("User not found with id " + eventRequest.getOrganizerId()));
-        // fetch Category
+        // Fetch Organizer
+        User organizer = userRepository.findById(organizerId)
+                .orElseThrow(() -> new UserNotFoundException("Organizer not found with id " + organizerId));
+
+        // Fetch Category
         Category category = categoryRepository.findById(eventRequest.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found with id " + eventRequest.getCategoryId()));
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found with id " + eventRequest.getCategoryId()));
 
-        //convert eventRequest to Entity
+        // Map request to entity
         Event event = eventMapper.toEntity(eventRequest);
-        //Assign organizer and category
-         event.setOrganizer(organizer);
-         event.setCategory(category);
-         // set default event status = draft
-         event.setStatus(EventStatus.DRAFT);
-
+        event.setOrganizer(organizer);
+        event.setCategory(category);
+        event.setStatus(EventStatus.DRAFT);
 
         Event saved = eventRepository.save(event);
+
+        // ✅ Publish event for Notification listener
+        domainEventPublisher.publish(
+                new EventDraftCreatedEvent(this, saved.getId(), saved.getName())
+        );
 
         return eventMapper.toDto(saved);
     }
 
+
+
     @Override
-    public EventDto updateEvent(Long eventId, EventRequest eventRequest) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found with id " + eventId));
-        event.setName(eventRequest.getName());
-        event.setVenue(eventRequest.getVenue());
-        event.setDescription(eventRequest.getDescription());
-        event.setStartTime(eventRequest.getStartTime());
-        event.setEndTime(eventRequest.getEndTime());
-        event.setSalesStartTime(eventRequest.getSalesStartTime());
-        event.setSalesEndTime(eventRequest.getSalesEndTime());
+    public EventDto updateEvent(Long organizerId, Long eventId, EventRequest eventRequest) {
 
-        Event updated = eventRepository.save(event);
+        Event existingEvent = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException("Event not found with id " + eventId));
+
+        // Check ownership
+        if (!existingEvent.getOrganizer().getId().equals(organizerId)) {
+            throw new EventUpdateException("You are not authorized to update this event");
+        }
+
+        existingEvent.setName(eventRequest.getName());
+        existingEvent.setVenue(eventRequest.getVenue());
+        existingEvent.setDescription(eventRequest.getDescription());
+        existingEvent.setStartTime(eventRequest.getStartTime());
+        existingEvent.setEndTime(eventRequest.getEndTime());
+        existingEvent.setSalesStartTime(eventRequest.getSalesStartTime());
+        existingEvent.setSalesEndTime(eventRequest.getSalesEndTime());
+
+        Event updated = eventRepository.save(existingEvent);
         return eventMapper.toDto(updated);
-
     }
 
-    @Override
     @Transactional(readOnly = true)
+    @Override
     public EventDto getEvent(Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found with id " + eventId));
-            return eventMapper.toDto(event);
+                .orElseThrow(() -> new EventNotFoundException("Event not found with id " + eventId));
+        return eventMapper.toDto(event);
     }
 
-    @Override
     @Transactional(readOnly = true)
+    @Override
     public List<EventDto> getAllEvents() {
-        List<Event> eventList = eventRepository.findAll();
-        return eventList.stream().map(eventMapper::toDto).collect(Collectors.toList());
+        return eventRepository.findAll()
+                .stream()
+                .map(eventMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public void deleteEvent(Long eventId) {
+    public void deleteEvent(Long organizerId, Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found with id " + eventId));
-          eventRepository.delete(event);
+                .orElseThrow(() -> new EventNotFoundException("Event not found with id " + eventId));
+
+        // Verify ownership before delete
+        if (!event.getOrganizer().getId().equals(organizerId)) {
+            throw new EventUpdateException("You are not authorized to delete this event");
+        }
+
+        eventRepository.delete(event);
     }
 
-    @Override
     @Transactional(readOnly = true)
+    @Override
     public List<EventDto> getEventsByOrganizerId(Long organizerId) {
-        User organizer = userRepository.findById(organizerId).
-                orElseThrow(() -> new RuntimeException("User not found with id " + organizerId));
-        List<Event> byOrganizerId = eventRepository.findByOrganizer_Id(organizer.getId());
-        return byOrganizerId.stream().map(eventMapper::toDto).collect(Collectors.toList());
-
+        return eventRepository.findByOrganizer_Id(organizerId)
+                .stream()
+                .map(eventMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    @Override
     @Transactional(readOnly = true)
+    @Override
     public List<EventDto> getEventsByCategoryId(Long categoryId) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found with id " + categoryId));
-        List<Event> byCategoryId = eventRepository.findByCategory_Id(category.getId());
-        return byCategoryId.stream().map(eventMapper::toDto).collect(Collectors.toList());
+        return eventRepository.findByCategory_Id(categoryId)
+                .stream()
+                .map(eventMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public EventDto publishEvent(Long eventId) {
-        Event event = eventRepository.findById(eventId).
-                orElseThrow(() -> new RuntimeException("Event not found with id " + eventId));
+    public EventDto publishEvent(Long organizerId, Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException("Event not found with id " + eventId));
+
+        if (!event.getOrganizer().getId().equals(organizerId)) {
+            throw new EventUpdateException("You are not authorized to publish this event");
+        }
+
         event.setStatus(EventStatus.PUBLISHED);
         Event saved = eventRepository.save(event);
+        //Notification for event has been published
+        domainEventPublisher.publish(new (this , ))
         return eventMapper.toDto(saved);
     }
 
     @Override
-    public EventDto updateEventStatus(Long eventId , EventStatus eventStatus) {
-        Event event = eventRepository.findById(eventId).
-                orElseThrow(() -> new RuntimeException("Event not found with id " + eventId));
-        if(event.getStatus() == EventStatus.COMPLETED ||  event.getStatus() == EventStatus.CANCELLED) {
-            throw  new IllegalArgumentException("Cannot change status of completed or cancelled event");
-        }
-        event.setStatus(eventStatus);
-        Event updated = eventRepository.save(event);
-        return eventMapper.toDto(updated);
-    }
-
-    @Override
-    public EventDto rescheduleEvent(Long eventId, LocalDateTime newStart, LocalDateTime newEnd) {
+    public EventDto startSalesTime(Long organizerId, Long eventId, SalesTimeRequest request) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found: " + eventId));
-        event.setStartTime(newStart);
-        event.setEndTime(newEnd);
+                .orElseThrow(() -> new EventNotFoundException("Event not found with id " + eventId));
+
+        if (!event.getOrganizer().getId().equals(organizerId)) {
+            throw new EventUpdateException("You are not authorized to reschedule this event");
+        }
+
+        event.setStartTime(request.getSalesStartTime());
+        event.setEndTime(request.getSalesEndTime());
         event.setStatus(EventStatus.RESCHEDULED);
         return eventMapper.toDto(eventRepository.save(event));
-    }
-
-
-    @Override
-    public EventDto startTicketSales(Long eventId, LocalDateTime start, LocalDateTime end) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found: " + eventId));
-        event.setSalesStartTime(start);
-        event.setSalesEndTime(end);
-        eventRepository.save(event);
-        return eventMapper.toDto(event);
     }
 
     @Override
     public void autoUpdateEvent(Event event) {
         LocalDateTime now = LocalDateTime.now();
-        if(event.getStatus() == EventStatus.PUBLISHED) {
-            if(now.isAfter(event.getStartTime()) &&  now.isBefore(event.getEndTime())) {
+        if (event.getStatus() == EventStatus.PUBLISHED) {
+            if (now.isAfter(event.getStartTime()) && now.isBefore(event.getEndTime())) {
                 event.setStatus(EventStatus.ONGOING);
-            }else if(now.isAfter(event.getEndTime())) {
+            } else if (now.isAfter(event.getEndTime())) {
                 event.setStatus(EventStatus.COMPLETED);
             }
             eventRepository.save(event);
         }
     }
-
 }

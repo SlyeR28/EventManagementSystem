@@ -9,6 +9,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class NotificationEventListener {
@@ -49,6 +51,30 @@ public class NotificationEventListener {
 
         notificationService.sendNotification(req);
     }
+
+    @Async("notifExecutor")
+    @EventListener
+    public void handleEventDraftCreated(EventDraftCreatedEvent event) {
+
+
+        List<User> recipients = userRepository.findByRoleIn( List.of("STAFF", "ORGANIZER", "ADMIN"));
+
+
+        for (User user : recipients) {
+            NotficationRequest req = NotficationRequest.builder()
+                    .userId(user.getId())
+                    .userEmail(user.getEmail())
+                    .subject("📝 New Event in Draft")
+                    .message("Hi " + user.getFullName() +
+                            ", a new event \"" + event.getEventName() + "\" is now in draft state. " +
+                            "Please review and take necessary actions.")
+                    .templateCode("EVENT_DRAFT_CREATED")
+                    .build();
+
+            notificationService.sendNotification(req);
+        }
+    }
+
 
 
 }

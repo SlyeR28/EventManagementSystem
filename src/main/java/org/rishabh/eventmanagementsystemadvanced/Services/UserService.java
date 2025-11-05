@@ -1,5 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Services;
 
+import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.User;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.Role;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.UserDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.UserRequest;
@@ -17,4 +18,5 @@ public interface UserService {
     Page<UserDto>getAllUsersByRole(Role role, int page , int size ,  String sortBy , String sortDir);
 
 
+    User getCurrentUser();
 }

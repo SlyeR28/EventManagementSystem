@@ -1,12 +1,20 @@
 package org.rishabh.eventmanagementsystemadvanced.Exception;
 
+import com.cloudinary.api.exceptions.ApiException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.yaml.snakeyaml.constructor.ConstructorException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -33,4 +41,68 @@ public class GlobalExceptionHandler {
         body.put("error", ex.getMessage());
         return new ResponseEntity<>(body , HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleUserNotFoundException(UserNotFoundException ex){
+        log.error(" Caught UserNotFoundException "  , ex);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage("User not found");
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleCategoryNotFoundException(CategoryNotFoundException ex){
+        log.error(" Caught UserNotFoundException "  , ex);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage("Category not found");
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EventNotFoundException.class)
+    public ResponseEntity<ApiResponse>hanldleEventNotFoundException(EventNotFoundException ex){
+        log.error(" Caught EventNotFoundException "  , ex);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage("Event Not Found");
+        return  new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse> hanldemehtodargumentnotvlaidexception(MethodArgumentNotValidException ex){
+        log.error(" Caught MethodArgumentNotValidException "  , ex);
+        ApiResponse apiResponse = new ApiResponse();
+        BindingResult bindingResult = ex.getBindingResult();
+        List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+        String errorMessage = fieldErrors.stream()
+                    .findFirst()
+                .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+                .orElse("Validation error occurred");
+        apiResponse.setMessage("Event Not Found");
+        apiResponse.setMessage(errorMessage);
+        return  new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse> hanldemehtodconstraintviolationexception(ConstraintViolationException ex){
+        log.error(" Caught ConstraintViolationException "  , ex);
+        ApiResponse apiResponse = new ApiResponse();
+        String occurred = ex.getConstraintViolations()
+                .stream()
+                .findFirst()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .orElse("Validation error occurred");
+        apiResponse.setMessage(occurred);
+        return  new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse> handleException(Exception ex) {
+        log.error("Caught exception", ex);
+        ApiResponse errorDto = new ApiResponse();
+        errorDto.setMessage("An unknown error occurred");
+        return new ResponseEntity<>(errorDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }
