@@ -67,6 +67,22 @@ public class GlobalExceptionHandler {
         return  new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(QrCodeNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleQrCodeNotFoundException(QrCodeNotFoundException ex){
+        log.error(" Caught QrCodeNotFoundException "  , ex);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage("QrCode Not Found");
+        return  new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(TicketNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleTicketNotFoundException(TicketNotFoundException ex){
+        log.error(" Caught TicketNotFoundException "  , ex);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage("Ticket Not Found");
+        return  new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse> hanldemehtodargumentnotvlaidexception(MethodArgumentNotValidException ex){
@@ -82,6 +98,7 @@ public class GlobalExceptionHandler {
         apiResponse.setMessage(errorMessage);
         return  new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
+
 
 
     @ExceptionHandler(ConstraintViolationException.class)
