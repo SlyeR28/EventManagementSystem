@@ -1,11 +1,7 @@
 package org.rishabh.eventmanagementsystemadvanced.Domains.Entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PaymentMethod;
+import lombok.*;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PaymentProviders;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PaymentStatus;
 
@@ -23,26 +19,34 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id" , nullable = false)
+    // Link to Order
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    private double amount;
-
     @Enumerated(EnumType.STRING)
-    @Column(length = 100 , nullable = false)
-   private PaymentStatus paymentStatus;
-
-    @Column(unique = true)
-    private String transactionId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 100)
-    private PaymentMethod paymentMethod;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 100 , nullable = false)
     private PaymentProviders paymentProviders;
 
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+
+    private String transactionId;      // internal app txn id
+    private String providerOrderId;    // Razorpay order id
+    private String providerPaymentId;  // Razorpay payment id
+    private Double amount;
+
     private LocalDateTime paymentDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.paymentStatus = this.paymentStatus == null ? PaymentStatus.CREATED : this.paymentStatus;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

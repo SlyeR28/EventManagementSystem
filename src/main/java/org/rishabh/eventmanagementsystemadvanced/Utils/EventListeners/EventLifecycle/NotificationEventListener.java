@@ -103,4 +103,60 @@ public class NotificationEventListener {
         } while (users.hasNext());
     }
 
+    @Async("notifExecutor")
+    @EventListener
+    public void handleEventCancelledEvents(EventCancelled event) {
+        int page = 0;
+        int size = 1000;
+        Page<User> users;
+
+        do {
+            users = userRepository.findAll(PageRequest.of(page, size));
+            users.getContent().forEach(user -> {
+                NotificationRequest req = NotificationRequest.builder()
+                        .userId(user.getId())
+                        .userEmail(user.getEmail())
+                        .subject("⚠️ Event Cancelled: " + event.getEventName())
+                        .message("Dear " + user.getFullName() + ",\n\n" +
+                                "We regret to inform you that the event \"" + event.getEventName() + "\" has been cancelled.\n" +
+                                "If you’ve already purchased tickets, our support team will contact you shortly regarding refunds.\n\n" +
+                                "We apologize for the inconvenience.")
+                        .templateCode("EVENT_CANCELLED")
+                        .build();
+                notificationService.sendNotification(req);
+            });
+            page++;
+        } while (!users.isLast());
+    }
+
+    @Async("notifExecutor")
+    @EventListener
+    public void handleUpdatedEvent(UpdatedEvent event) {
+
+
+        int page = 0;
+        int size = 1000;
+        Page<User> users;
+
+        do {
+            users = userRepository.findAll(PageRequest.of(page, size));
+            users.getContent().forEach(user -> {
+                NotificationRequest req = NotificationRequest.builder()
+                        .userId(user.getId())
+                        .userEmail(user.getEmail())
+                        .subject("📝 Event Updated: " + event.getEventName())
+                        .message("Hello " + user.getFullName() + ",\n\n" +
+                                "Good news! The event \"" + event.getEventName() + "\" has been updated with new details.\n" +
+                                "Please visit the event page to check the latest information.\n\n" +
+                                "Stay tuned,\nEvent Management Team")
+                        .templateCode("EVENT_UPDATED")
+                        .build();
+
+                notificationService.sendNotification(req);
+            });
+            page++;
+        } while (!users.isLast());
+    }
+
+
 }

@@ -15,8 +15,10 @@ import org.rishabh.eventmanagementsystemadvanced.Repository.EventRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.UserRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.EventService;
 import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.DomainEventPublisher;
+import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifecycle.EventCancelled;
 import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifecycle.EventDraftCreatedEvent;
 import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifecycle.TicketSalesStartedEvent;
+import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifecycle.UpdatedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,6 +87,9 @@ public class EventServiceImpl implements EventService {
         existingEvent.setSalesEndTime(eventRequest.getSalesEndTime());
 
         Event updated = eventRepository.save(existingEvent);
+
+        domainEventPublisher.publish(new UpdatedEvent(this, updated.getId(), updated.getName()));
+
         return eventMapper.toDto(updated);
     }
 
@@ -114,6 +119,8 @@ public class EventServiceImpl implements EventService {
         if (!event.getOrganizer().getId().equals(organizerId)) {
             throw new EventUpdateException("You are not authorized to delete this event");
         }
+
+        domainEventPublisher.publish(new EventCancelled(this, event.getId(), event.getName()));
 
         eventRepository.delete(event);
     }
@@ -167,12 +174,14 @@ public class EventServiceImpl implements EventService {
         event.setEndTime(request.getSalesEndTime());
         event.setStatus(EventStatus.PUBLISHED);
 
+        Event saved = eventRepository.save(event);
+
         // notification for ticket sales are live
         domainEventPublisher.publish(
-                new TicketSalesStartedEvent(this ,eventId , event.getName())
+                new TicketSalesStartedEvent(this, saved.getId(), saved.getName())
         );
 
-        return eventMapper.toDto(eventRepository.save(event));
+        return eventMapper.toDto(eventRepository.save(saved));
     }
 
     @Override

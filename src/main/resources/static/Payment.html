@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+<h2>Complete Your Payment</h2>
+<input type="text" id="email" placeholder="Enter your email" />
+<input type="number" id="amount" placeholder="Enter amount in INR" />
+<button id="payBtn">Pay Now</button>
+
+<script>
+    const payBtn = document.getElementById('payBtn');
+
+    payBtn.addEventListener('click', async () => {
+        const amountInput = document.getElementById('amount');
+        const emailInput = document.getElementById('email');
+
+        const amount = parseFloat(amountInput.value);
+        const email = emailInput.value;
+
+        if (!amount || amount <= 0) {
+            alert("Enter a valid amount");
+            return;
+        }
+
+        if (!email) {
+            alert("Enter your email");
+            return;
+        }
+
+        try {
+            // Create PaymentRequest object
+            const paymentRequest = {
+                orderId: Date.now(), // example: use timestamp or your internal order id
+                amount: amount, // in major units (INR)
+                currency: "INR",
+                description: "Event Ticket Payment",
+                email: email,
+                paymentProviders: "RAZORPAY" // match your enum
+            };
+
+            // Step 1: Call backend to create payment
+            const response = await fetch(`http://localhost:8080/api/payments/create/razorpay`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(paymentRequest)
+            });
+
+            const paymentData = await response.json();
+
+            // Step 2: Configure Razorpay checkout
+            const options = {
+                key: paymentData.key, // frontend key from backend
+                amount: paymentData.amount * 100, // convert to paise
+                currency: paymentData.currency,
+                name: "Event Management",
+                description: paymentData.description,
+                order_id: paymentData.orderId,
+                handler: async function (razorpayResponse) {
+                    // Step 3: Verify payment via backend
+                    const verifyResponse = await fetch(`http://localhost:8080/api/payments/razorpay/verify?orderId=${paymentData.orderId}&paymentId=${razorpayResponse.razorpay_payment_id}`, {
+                        method: 'POST'
+                    });
+
+                    const result = await verifyResponse.json();
+                    alert(result.message || "Payment completed!");
+                },
+                prefill: {
+                    email: paymentData.email
+                },
+                theme: { color: "#3399cc" }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } catch (err) {
+            console.error(err);
+            alert("Error creating payment. Try again.");
+        }
+    });
+</script>
+</body>
+</html>

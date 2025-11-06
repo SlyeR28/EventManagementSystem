@@ -32,96 +32,91 @@ import java.util.concurrent.ThreadLocalRandom;
 public class PaymentServiceImpl implements PaymentService {
 
     private final Map<String, PaymentGateWay> gateways;
-    private  Map<PaymentProviders , PaymentGateWay> paymentGatewayMap;
-    private final PaymentRepository  paymentRepository;
+    private Map<PaymentProviders, PaymentGateWay> paymentGatewayMap;
+    private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final TicketService ticketService;
+    // private final NotificationService notificationService; // optional
 
     @PostConstruct
-    void init(){
-        // ✅ Initialize the map first
+    void init() {
         paymentGatewayMap = new EnumMap<>(PaymentProviders.class);
-
-        // ✅ Populate with available gateways
         if (gateways.containsKey("razorpay")) {
             paymentGatewayMap.put(PaymentProviders.RAZORPAY, gateways.get("razorpay"));
         }
-        if (gateways.containsKey("stripe")) {
-            paymentGatewayMap.put(PaymentProviders.STRIPE, gateways.get("stripe"));
-        }
-
-        System.out.println("✅ Payment gateways initialized: " + paymentGatewayMap.keySet());
-
-
     }
 
-    private PaymentGateWay getPaymentGateway(PaymentProviders paymentProvider){
-        return paymentGatewayMap.getOrDefault(paymentProvider , paymentGatewayMap.get(PaymentProviders.RAZORPAY));
+    private PaymentGateWay getPaymentGateway(PaymentProviders provider) {
+        return paymentGatewayMap.getOrDefault(provider, paymentGatewayMap.get(PaymentProviders.RAZORPAY));
     }
-
 
     @Override
     public PaymentResponse makePayment(PaymentRequest paymentRequest) {
         Order order = orderRepository.findById(paymentRequest.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order Not Found"));
-        PaymentProviders providers = paymentRequest.getPaymentProviders() != null
-                   ? paymentRequest.getPaymentProviders()
-                  : PaymentProviders.RAZORPAY;
+                .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        PaymentGateWay gateWay = getPaymentGateway(providers);
-        PaymentResponse gatewayResponse  = gateWay.createPayment(paymentRequest);
+        PaymentProviders provider = paymentRequest.getPaymentProviders() != null
+                ? paymentRequest.getPaymentProviders()
+                : PaymentProviders.RAZORPAY;
 
-        Payment payment1 = Payment.builder()
+        PaymentGateWay gateWay = getPaymentGateway(provider);
+        PaymentResponse gatewayResponse = gateWay.createPayment(paymentRequest);
+
+        Payment payment = Payment.builder()
                 .order(order)
                 .amount(paymentRequest.getAmount())
-                .paymentProviders(providers)
+                .paymentProviders(provider)
                 .paymentStatus(PaymentStatus.CREATED)
                 .transactionId(generateTransactionId())
+                .providerOrderId(gatewayResponse.getProviderOrderId())
                 .paymentDate(LocalDateTime.now())
                 .build();
 
-        paymentRepository.save(payment1);
+        paymentRepository.save(payment);
 
+        gatewayResponse.setPaymentId(payment.getId());
+        gatewayResponse.setTransactionId(payment.getTransactionId());
+
+        log.info("🧾 Payment created for order {} with providerOrderId {}", order.getId(), payment.getProviderOrderId());
         return gatewayResponse;
     }
 
     @Override
     public PayamentVerficationResponse verifyPayment(Long orderId, Long paymentId, String provider) {
-        PaymentProviders providers = PaymentProviders.valueOf(provider.toUpperCase());
-        PaymentGateWay gateWay = getPaymentGateway(providers);
+        PaymentProviders prov = PaymentProviders.valueOf(provider.toUpperCase());
+        PaymentGateWay gateWay = getPaymentGateway(prov);
         PayamentVerficationResponse response = gateWay.verifyPayment(orderId, paymentId);
 
-        if(response.isVerified()) {
-            Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new RuntimeException("Payment Not Found"));
+        if (response.isVerified()) {
+            Payment payment = paymentRepository.findById(paymentId)
+                    .orElseThrow(() -> new RuntimeException("Payment Not Found"));
+
             payment.setPaymentStatus(PaymentStatus.SUCCESS);
             paymentRepository.save(payment);
 
             Order order = payment.getOrder();
             order.setStatus(OrderStatus.CONFIRMED);
+            order.setProviderOrderId(payment.getProviderOrderId());
+            order.setProviderPaymentId(payment.getProviderPaymentId());
             orderRepository.save(order);
 
-            // generating the ticket
             ticketService.generateTickets(order.getId());
             log.info("🎟 Tickets generated for order {}", order.getId());
-
 
         }
         return response;
     }
 
-
-
     @Override
     public void handleWebhook(String provider, String payload) {
-        PaymentProviders providers = PaymentProviders.valueOf(provider.toUpperCase());
-        PaymentGateWay gateWay = getPaymentGateway(providers);
-        gateWay.handleWebhook(payload , Map.of());
-
+        PaymentProviders prov = PaymentProviders.valueOf(provider.toUpperCase());
+        PaymentGateWay gateWay = getPaymentGateway(prov);
+        gateWay.handleWebhook(payload, Map.of());
     }
 
     @Override
     public PaymentRefundResponse refundPayment(Long paymentId, Double amount, String provider) {
-        return null;
+        return null; // future enhancement
     }
 
     private String generateTransactionId() {
@@ -129,6 +124,4 @@ public class PaymentServiceImpl implements PaymentService {
         int rand = ThreadLocalRandom.current().nextInt(1000, 9999);
         return "txn_" + ts + "_" + rand;
     }
-
-
 }

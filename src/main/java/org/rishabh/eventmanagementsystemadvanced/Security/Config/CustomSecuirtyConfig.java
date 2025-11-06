@@ -46,6 +46,7 @@ public class CustomSecuirtyConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/user/activation"
                         ).permitAll()
+                                .requestMatchers("/payment.html", "/api/payments/**").permitAll()
 //                        .requestMatchers(HttpMethod.GET, "/api/user-image/**").permitAll() // public image GET
 //                        .requestMatchers("/api/v1/user/**").authenticated()
                         .anyRequest().authenticated()

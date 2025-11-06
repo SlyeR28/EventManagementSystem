@@ -21,9 +21,8 @@ public class EventController {
 
     private final EventService eventService;
 
-    /**
-     * ✅ Create Event (with organizerId as PathVariable)
-     */
+
+
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     @PostMapping("/create/{organizerId}")
     public ResponseEntity<EventDto> createEvent(
@@ -34,9 +33,7 @@ public class EventController {
         return new ResponseEntity<>(createdEvent, HttpStatus.CREATED);
     }
 
-    /**
-     * ✅ Update Event (organizer-specific)
-     */
+
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     @PutMapping("/update/{organizerId}/{eventId}")
     public ResponseEntity<EventDto> updateEvent(
@@ -48,27 +45,19 @@ public class EventController {
         return ResponseEntity.ok(updatedEvent);
     }
 
-    /**
-     * ✅ Get Event by ID
-     */
     @GetMapping("/get/{eventId}")
     public ResponseEntity<EventDto> getEvent(@PathVariable Long eventId) {
         EventDto event = eventService.getEvent(eventId);
         return ResponseEntity.ok(event);
     }
 
-    /**
-     * ✅ Get All Events
-     */
+
     @GetMapping("/")
     public ResponseEntity<List<EventDto>> getAllEvents() {
         List<EventDto> events = eventService.getAllEvents();
         return ResponseEntity.ok(events);
     }
 
-    /**
-     * ✅ Delete Event (organizer ownership required)
-     */
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     @DeleteMapping("/delete/{organizerId}/{eventId}")
     public ResponseEntity<ApiResponse> deleteEvent(
@@ -79,9 +68,7 @@ public class EventController {
         return ResponseEntity.ok(new ApiResponse("Event deleted successfully"));
     }
 
-    /**
-     * ✅ Get All Events by Organizer ID
-     */
+
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     @GetMapping("/organizer/{organizerId}")
     public ResponseEntity<List<EventDto>> getEventsByOrganizer(@PathVariable Long organizerId) {
@@ -89,18 +76,14 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
-    /**
-     * ✅ Get All Events by Category ID
-     */
+
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<List<EventDto>> getEventsByCategory(@PathVariable Long categoryId) {
         List<EventDto> events = eventService.getEventsByCategoryId(categoryId);
         return ResponseEntity.ok(events);
     }
 
-    /**
-     * ✅ Publish Event (only by owning organizer)
-     */
+
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     @PatchMapping("/publish/{organizerId}/{eventId}")
     public ResponseEntity<EventDto> publishEvent(
@@ -111,9 +94,7 @@ public class EventController {
         return ResponseEntity.ok(eventDto);
     }
 
-    /**
-     * ✅ Start/Update Sales Time (with organizerId)
-     */
+
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     @PutMapping("/{organizerId}/{eventId}/sales-time")
     public ResponseEntity<EventDto> updateSalesTime(
