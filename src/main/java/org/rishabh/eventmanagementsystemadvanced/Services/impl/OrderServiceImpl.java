@@ -9,6 +9,7 @@ import org.rishabh.eventmanagementsystemadvanced.Mapper.OrderMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.OrderResponse;
 import org.rishabh.eventmanagementsystemadvanced.Repository.CartRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.OrderRepository;
+import org.rishabh.eventmanagementsystemadvanced.Services.CartService;
 import org.rishabh.eventmanagementsystemadvanced.Services.OrderService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,40 +26,52 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
+    private final CartService  cartService;
+
 
     @Override
     public OrderResponse placeOrder(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("cart not found"));
+        // 1️⃣ Get cart
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
 
         if(cart.getItems().isEmpty()) {
-            throw new RuntimeException("cart items not found");
+            throw new RuntimeException("Cart items not found");
         }
-        //cart to order
+
+        // 2️⃣ Create Order entity
         Order order = Order.builder()
                 .user(cart.getUser())
                 .totalAmount(cart.getTotalPrice())
                 .status(OrderStatus.CREATED)
                 .createdAt(LocalDateTime.now())
                 .build();
+
+        // 3️⃣ Create OrderItem entities and link to order
         List<OrderItem> orderItems = cart.getItems().stream()
-                .map(item -> OrderItem.builder()
+                .map(cartItem -> OrderItem.builder()
                         .order(order)
-                        .event(item.getEvent())
-                        .ticketType(item.getTicketType())
-                        .quantity(item.getQuantity())
-                        .price(item.getPrice())
+                        .event(cartItem.getEvent())
+                        .ticketType(cartItem.getTicketType())
+                        .quantity(cartItem.getQuantity())
+                        .price(cartItem.getPrice())
                         .build())
                 .collect(Collectors.toList());
+
         order.setOrderItems(orderItems);
-        Order saved = orderRepository.save(order);
 
-        //clear the cart after placing order
-        cart.getItems().clear();
-        cart.setTotalPrice(0.0);
+        // 4️⃣ Save order (cascade saves items because of cascade = ALL)
+        Order savedOrder = orderRepository.save(order);
+
+        // 5️⃣ Mark cart as checked out
+        cart.setCheckedOut(true);
         cartRepository.save(cart);
+        cartService.clearCart(cart.getId());
 
-        return orderMapper.toResponse(saved);
+        // 6️⃣ Map to DTO
+        return orderMapper.toResponse(savedOrder);
     }
+
 
     @Override
     public OrderResponse viewOrder(Long orderId) {
@@ -73,6 +86,4 @@ public class OrderServiceImpl implements OrderService {
         return orderList.stream().map(orderMapper::toResponse).collect(Collectors.toList());
 
     }
-
-
 }

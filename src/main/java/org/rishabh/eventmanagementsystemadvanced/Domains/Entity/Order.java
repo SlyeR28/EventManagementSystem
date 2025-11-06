@@ -35,7 +35,10 @@ public class Order {
 
     private LocalDateTime createdAt;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @Column(name = "checked_out")
+    private boolean checkedOut = false;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
 

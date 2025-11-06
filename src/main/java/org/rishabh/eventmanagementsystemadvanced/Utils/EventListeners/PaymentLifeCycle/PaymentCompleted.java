@@ -1,4 +1,4 @@
-package org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners;
+package org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.PaymentLifeCycle;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;

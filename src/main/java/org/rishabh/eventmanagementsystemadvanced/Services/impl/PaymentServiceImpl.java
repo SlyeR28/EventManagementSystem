@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Transactional
@@ -75,7 +76,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .amount(paymentRequest.getAmount())
                 .paymentProviders(providers)
                 .paymentStatus(PaymentStatus.CREATED)
-                .transactionId(gatewayResponse.getTransactionId())
+                .transactionId(generateTransactionId())
                 .paymentDate(LocalDateTime.now())
                 .build();
 
@@ -122,4 +123,12 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentRefundResponse refundPayment(Long paymentId, Double amount, String provider) {
         return null;
     }
+
+    private String generateTransactionId() {
+        long ts = System.currentTimeMillis();
+        int rand = ThreadLocalRandom.current().nextInt(1000, 9999);
+        return "txn_" + ts + "_" + rand;
+    }
+
+
 }

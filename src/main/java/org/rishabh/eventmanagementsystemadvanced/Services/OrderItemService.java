@@ -1,19 +1,20 @@
 package org.rishabh.eventmanagementsystemadvanced.Services;
 
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.OrderItem;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.OrderItemResponse;
 
 import java.util.List;
 
 public interface OrderItemService {
 
 
+    // ✅ Updated to return DTOs (for frontend responses)
+    List<OrderItemResponse> getItemsByEventId(Long eventId);
+
+    List<OrderItemResponse> getItemsByOrderId(Long orderId);
+
+    // ✅ These remain for internal persistence
     void saveAll(List<OrderItem> orderItemList);
-
-    // Get all items of an order
-    List<OrderItem> getItemsByOrderId(Long orderId);
-
-    // Get all items sold for a specific event (optional but useful for analytics)
-    List<OrderItem> getItemsByEventId(Long eventId);
 
     void deleteByOrderId(Long orderId);
 

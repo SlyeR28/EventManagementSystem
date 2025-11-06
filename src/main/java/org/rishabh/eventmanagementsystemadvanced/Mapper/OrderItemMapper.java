@@ -11,16 +11,16 @@ import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.OrderItemReques
 public interface OrderItemMapper {
 
     OrderItemMapper INSTANCE = Mappers.getMapper(OrderItemMapper.class);
-
-    // Entity -> Response
-    @Mapping(source = "event.name", target = "eventName")
-    @Mapping(source = "ticketType.name", target = "ticketTypeName")
+//    Entity → Response
+    @Mapping(target = "orderItemId", source = "id") // add this line
+    @Mapping(target = "eventName", source = "event.name")
+    @Mapping(target = "ticketTypeName", source = "ticketType.name")
     OrderItemResponse toResponse(OrderItem item);
 
-    // Request -> Entity
+    // Request → Entity
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "order", ignore = true) // handled in service
-    @Mapping(target = "event.id", source = "eventId")
-    @Mapping(target = "ticketType.id", source = "ticketTypeId")
+    @Mapping(target = "event", ignore = true) // set manually in service
+    @Mapping(target = "ticketType", ignore = true) // set manually in service
     OrderItem toEntity(OrderItemRequest request);
 }

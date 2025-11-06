@@ -1,4 +1,4 @@
-package org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners;
+package org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.PaymentLifeCycle;
 
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.User;

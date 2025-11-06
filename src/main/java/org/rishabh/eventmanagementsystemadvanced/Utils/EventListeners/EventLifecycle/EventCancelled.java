@@ -1,20 +1,17 @@
-package org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners;
+package org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifecycle;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
 @Getter
-public class TicketSalesStartedEvent extends ApplicationEvent {
+public class EventCancelled extends ApplicationEvent {
 
     private final Long eventId;
     private final String eventName;
 
-
-    public TicketSalesStartedEvent(Object source, Long eventId, String eventName) {
+    public EventCancelled(Object source, Long eventId, String eventName) {
         super(source);
-
         this.eventId = eventId;
         this.eventName = eventName;
-
     }
 }

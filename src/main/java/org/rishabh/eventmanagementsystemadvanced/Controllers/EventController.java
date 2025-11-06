@@ -51,7 +51,7 @@ public class EventController {
     /**
      * ✅ Get Event by ID
      */
-    @GetMapping("/{eventId}")
+    @GetMapping("/get/{eventId}")
     public ResponseEntity<EventDto> getEvent(@PathVariable Long eventId) {
         EventDto event = eventService.getEvent(eventId);
         return ResponseEntity.ok(event);
@@ -60,7 +60,7 @@ public class EventController {
     /**
      * ✅ Get All Events
      */
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<List<EventDto>> getAllEvents() {
         List<EventDto> events = eventService.getAllEvents();
         return ResponseEntity.ok(events);

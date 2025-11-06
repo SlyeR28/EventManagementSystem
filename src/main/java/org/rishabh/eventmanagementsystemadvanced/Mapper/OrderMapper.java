@@ -12,6 +12,10 @@ public interface OrderMapper {
 
     OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
+
+    @Mapping(target = "orderId", source = "id")
+    @Mapping(target = "userName", source = "user.fullName")
+    @Mapping(target = "orderStatus", source = "status")
     @Mapping(target = "items", source = "orderItems")
     OrderResponse toResponse(Order order);
 

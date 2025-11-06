@@ -11,13 +11,13 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CartMapper {
 
-    // Main mapping
     @Mapping(target = "cartId", source = "id")
     @Mapping(target = "items", source = "items")
     @Mapping(target = "totalPrice", source = "totalPrice")
+    @Mapping(target = "userId", source = "user.id")        // <-- map userId
+    @Mapping(target = "userName", source = "user.fullName")   // <-- map userName
     CartResponse toCartResponse(Cart cart);
 
-    // Map individual items
     @Mapping(target = "cartItemId", source = "id")
     @Mapping(target = "eventId", source = "ticketType.event.id")
     @Mapping(target = "eventName", source = "ticketType.event.name")
@@ -28,6 +28,6 @@ public interface CartMapper {
     @Mapping(target = "totalPrice", source = "price")
     CartItemResponse toCartItemResponse(CartItem item);
 
-    // Map list of items
     List<CartItemResponse> toCartItemResponseList(List<CartItem> items);
 }
+

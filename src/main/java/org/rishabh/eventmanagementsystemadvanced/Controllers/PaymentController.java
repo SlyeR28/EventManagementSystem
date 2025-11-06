@@ -9,6 +9,7 @@ import org.rishabh.eventmanagementsystemadvanced.Services.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/payments")

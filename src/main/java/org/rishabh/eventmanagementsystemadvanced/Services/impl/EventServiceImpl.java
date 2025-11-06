@@ -15,8 +15,8 @@ import org.rishabh.eventmanagementsystemadvanced.Repository.EventRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.UserRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.EventService;
 import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.DomainEventPublisher;
-import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventDraftCreatedEvent;
-import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.TicketSalesStartedEvent;
+import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifecycle.EventDraftCreatedEvent;
+import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifecycle.TicketSalesStartedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
