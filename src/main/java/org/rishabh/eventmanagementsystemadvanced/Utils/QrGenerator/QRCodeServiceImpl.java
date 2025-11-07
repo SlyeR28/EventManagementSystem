@@ -49,17 +49,4 @@ public class QRCodeServiceImpl implements QRCodeService {
     }
 
 
-    //    public static String generateQrCode(String text , String filePath) {
-//        try{
-//            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-//            BitMatrix bitMatrix = qrCodeWriter.encode(text , BarcodeFormat.QR_CODE , 300 , 300);
-//
-//            Path path = FileSystems.getDefault().getPath(filePath);
-//            MatrixToImageWriter.writeToPath(bitMatrix, "png", path);
-//            return filePath;
-//        }catch (WriterException | IOException e){
-//            throw new RuntimeException("Error generating QR code");
-//        }
-//    }
-
 }

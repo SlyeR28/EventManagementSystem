@@ -15,7 +15,7 @@ public class TicketController {
 
    private final TicketService ticketService;
 
-    // ✅ Create Ticket (after order or payment)
+
     @PostMapping("/generate/{orderId}")
     public ResponseEntity<List<TicketResponse>> createTicket(@PathVariable Long orderId) {
         List<TicketResponse> generateTickets = ticketService.generateTickets(orderId);
@@ -23,13 +23,13 @@ public class TicketController {
     }
 
 
-    // ✅ Fetch Ticket by ID
+
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponse> getTicketById(@PathVariable Long id) {
         return ResponseEntity.ok(ticketService.getTicketById(id));
     }
 
-    // ✅ Get User's Tickets
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<TicketResponse>> getTicketsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(ticketService.getTicketsByUser(userId));
