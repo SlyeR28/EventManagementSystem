@@ -1,7 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 
 import com.razorpay.Order;
-import com.razorpay.Payment;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import jakarta.annotation.PostConstruct;
@@ -9,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.rishabh.eventmanagementsystemadvanced.Config.RazorPayConfig;
+import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Payment;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.OrderStatus;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PaymentProviders;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PaymentStatus;
@@ -23,6 +23,7 @@ import org.rishabh.eventmanagementsystemadvanced.Services.TicketService;
 import org.rishabh.eventmanagementsystemadvanced.Utils.SignatureUtil;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Slf4j
@@ -58,71 +59,72 @@ public class RazorPayPaymentGateway implements PaymentGateWay {
                     .providerOrderId(order.get("id"))
                     .amount(paymentRequest.getAmount())
                     .paymentProviders(PaymentProviders.RAZORPAY)
-                    .status(PaymentStatus.CREATED)
-                    .providerPayload(order.toString())
+                    .paymentStatus(PaymentStatus.CREATED)
+                    .paymentDate(LocalDateTime.now())
                     .build();
         } catch (RazorpayException e) {
-            throw new RuntimeException("Razorpay Exception", e);
+            throw new RuntimeException("Razorpay create order failed", e);
         }
     }
 
     @Override
-    public PayamentVerficationResponse verifyPayment(Long orderId, Long paymentId) {
+    public boolean verifyPayment(String providerOrderId, String providerPaymentId, String signature) {
         try {
-            Payment rzpPayment = razorpayClient.payments.fetch(paymentId.toString());
-            String status = rzpPayment.get("status");
-            boolean success = "captured".equalsIgnoreCase(status) || "authorized".equalsIgnoreCase(status);
-            return new PayamentVerficationResponse(success, status);
-        } catch (RazorpayException e) {
-            return new PayamentVerficationResponse(false, "ERROR");
+            String payload = providerOrderId + "|" + providerPaymentId;
+            boolean verified = SignatureUtil.verifyRazorPaySignature(signature, payload, razorPayConfig.getSecret());
+
+            if (verified) {
+                Payment payment = paymentRepository.findByProviderOrderId(providerOrderId)
+                        .orElseThrow(() -> new RuntimeException("Payment not found for providerOrderId: " + providerOrderId));
+
+                payment.setProviderPaymentId(providerPaymentId);
+                payment.setPaymentStatus(PaymentStatus.SUCCESS);
+                paymentRepository.save(payment);
+
+                log.info("✅ Razorpay signature verified for providerOrderId {}", providerOrderId);
+            }
+
+            return verified;
+        } catch (Exception e) {
+            log.error(" Razorpay verification failed", e);
+            return false;
         }
     }
 
     @Override
     public void handleWebhook(String payload, Map<String, String> headers) {
         try {
+            String signature = headers.get("x-razorpay-signature");
+            boolean valid = SignatureUtil.verifyRazorPaySignature(signature, payload, razorPayConfig.getSecret());
+
+            if (!valid) {
+                log.error(" Invalid Razorpay webhook signature");
+                return;
+            }
+
             JSONObject json = new JSONObject(payload);
             String event = json.getString("event");
+            if (!"payment.captured".equalsIgnoreCase(event)) return;
 
-            JSONObject paymentEntity = json
-                    .getJSONObject("payload")
-                    .getJSONObject("payment")
-                    .getJSONObject("entity");
-
-            String providerPaymentId = paymentEntity.getString("id");
+            JSONObject paymentEntity = json.getJSONObject("payload").getJSONObject("payment").getJSONObject("entity");
             String providerOrderId = paymentEntity.getString("order_id");
+            String providerPaymentId = paymentEntity.getString("id");
             String status = paymentEntity.getString("status");
 
-            String signature = headers.get("x-razorpay-signature");
-            String secret = razorPayConfig.getSecret();
-            boolean isValid = SignatureUtil.verifyRazorPaySignature(payload, signature, secret);
+            if (!"captured".equalsIgnoreCase(status)) return;
 
-            if (!isValid) {
-                log.error("❌ Invalid webhook signature for Razorpay webhook");
-                throw new RuntimeException("Invalid webhook signature");
-            }
+            Payment payment = paymentRepository.findByProviderOrderId(providerOrderId)
+                    .orElseThrow(() -> new RuntimeException("Payment not found for providerOrderId: " + providerOrderId));
 
-            if ("payment.captured".equalsIgnoreCase(event) && "captured".equalsIgnoreCase(status)) {
-                org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Payment payment =
-                        paymentRepository.findByProviderOrderId(providerOrderId)
-                                .orElseThrow(() -> new RuntimeException("Payment not found for providerOrderId: " + providerOrderId));
+            // Only update PaymentStatus
+            payment.setProviderPaymentId(providerPaymentId);
+            payment.setPaymentStatus(PaymentStatus.SUCCESS);
+            paymentRepository.save(payment);
 
-                payment.setProviderPaymentId(providerPaymentId);
-                payment.setPaymentStatus(PaymentStatus.SUCCESS);
-                paymentRepository.save(payment);
+            log.info(" Razorpay webhook processed: PaymentStatus updated for providerOrderId {}", providerOrderId);
 
-                org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Order order = payment.getOrder();
-                order.setStatus(OrderStatus.CONFIRMED);
-                order.setProviderOrderId(providerOrderId);
-                order.setProviderPaymentId(providerPaymentId);
-                orderRepository.save(order);
-
-                ticketService.generateTickets(order.getId());
-                log.info("✅ Payment confirmed via webhook for Order ID {}", order.getId());
-            }
         } catch (Exception e) {
-            log.error("⚠️ Webhook handling failed", e);
-            throw new RuntimeException("Webhook handling failed", e);
+            log.error("Razorpay webhook processing failed", e);
         }
     }
 

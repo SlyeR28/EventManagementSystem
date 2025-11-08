@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class SearchRequest {
 
-    private String keyword;       // for name/venue/category
+    private String keyword;
     private String category;
     private String organizer;
     private String venue;

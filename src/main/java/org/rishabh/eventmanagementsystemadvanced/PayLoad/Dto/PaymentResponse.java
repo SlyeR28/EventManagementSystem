@@ -17,8 +17,6 @@ public class PaymentResponse {
     private Double amount;
     private PaymentStatus paymentStatus;
     private PaymentProviders paymentProviders;
-    private PaymentStatus status;
-    private String providerPayload;
     private String providerOrderId;
     private String providerPaymentId;
     private LocalDateTime paymentDate;

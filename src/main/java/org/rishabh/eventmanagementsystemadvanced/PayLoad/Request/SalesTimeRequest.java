@@ -13,6 +13,6 @@ import java.time.LocalDateTime;
 @Builder
 public class SalesTimeRequest {
 
-private LocalDateTime salesStartTime;
+   private LocalDateTime salesStartTime;
     private LocalDateTime salesEndTime;
 }

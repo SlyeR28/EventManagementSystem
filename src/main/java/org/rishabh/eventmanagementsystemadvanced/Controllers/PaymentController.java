@@ -9,6 +9,8 @@ import org.rishabh.eventmanagementsystemadvanced.Services.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequiredArgsConstructor
@@ -24,19 +26,26 @@ public class PaymentController {
         PaymentResponse payment = paymentService.makePayment(paymentRequest);
         return ResponseEntity.ok().body(payment);
     }
-
     @PostMapping("/webhook/{provider}")
-    public ResponseEntity<ApiResponse> handleWebhook(@PathVariable String provider ,
-                                                     @RequestBody String payload) {
-     paymentService.handleWebhook(provider, payload);
-     return ResponseEntity.ok().body(new ApiResponse("success"));
+    public ResponseEntity<ApiResponse> handleWebhook(
+            @PathVariable String provider,
+            @RequestBody String payload,
+            @RequestHeader(value = "x-razorpay-signature", required = false) String signature
+    ) {
+        // Pass headers to service for secure verification
+        paymentService.handleWebhook(provider, payload, Map.of("x-razorpay-signature", signature));
+        return ResponseEntity.ok().body(new ApiResponse("success"));
     }
 
     @PostMapping("/{provider}/verify")
-    public ResponseEntity<PayamentVerficationResponse>verifyPayment(  @PathVariable String provider,
-                                                                      @RequestParam Long orderId,
-                                                                      @RequestParam Long paymentId){
-        PayamentVerficationResponse response = paymentService.verifyPayment(orderId, paymentId, provider);
+    public ResponseEntity<PayamentVerficationResponse> verifyPayment(
+            @PathVariable String provider,
+            @RequestParam Long orderId,
+            @RequestParam String providerPaymentId,
+            @RequestParam String providerSignature
+    ) {
+        PayamentVerficationResponse response =
+                paymentService.verifyPayment(orderId, providerPaymentId, providerSignature, provider);
         return ResponseEntity.ok().body(response);
     }
 

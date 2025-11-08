@@ -29,9 +29,7 @@ public class Order {
     @Column(length = 50)
     private OrderStatus status;
 
-    // these are set once payment succeeds
-    private String providerOrderId;
-    private String providerPaymentId;
+
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

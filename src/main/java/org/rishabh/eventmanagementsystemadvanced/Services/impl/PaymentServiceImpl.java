@@ -33,10 +33,11 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final Map<String, PaymentGateWay> gateways;
     private Map<PaymentProviders, PaymentGateWay> paymentGatewayMap;
+
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final TicketService ticketService;
-    // private final NotificationService notificationService; // optional
+
 
     @PostConstruct
     void init() {
@@ -82,37 +83,38 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PayamentVerficationResponse verifyPayment(Long orderId, Long paymentId, String provider) {
-        PaymentProviders prov = PaymentProviders.valueOf(provider.toUpperCase());
-        PaymentGateWay gateWay = getPaymentGateway(prov);
-        PayamentVerficationResponse response = gateWay.verifyPayment(orderId, paymentId);
-
-        if (response.isVerified()) {
-            Payment payment = paymentRepository.findById(paymentId)
-                    .orElseThrow(() -> new RuntimeException("Payment Not Found"));
-
-            payment.setPaymentStatus(PaymentStatus.SUCCESS);
-            paymentRepository.save(payment);
-
-            Order order = payment.getOrder();
-            order.setStatus(OrderStatus.CONFIRMED);
-            order.setProviderOrderId(payment.getProviderOrderId());
-            order.setProviderPaymentId(payment.getProviderPaymentId());
-            orderRepository.save(order);
-
-            ticketService.generateTickets(order.getId());
-            log.info("🎟 Tickets generated for order {}", order.getId());
-
-        }
-        return response;
+    public void handleWebhook(String provider, String payload, Map<String, String> headers) {
+        PaymentProviders providers = PaymentProviders.valueOf(provider.toUpperCase());
+        PaymentGateWay gateWay = getPaymentGateway(providers);
+            gateWay.handleWebhook(payload, headers);
     }
 
     @Override
-    public void handleWebhook(String provider, String payload) {
+    public PayamentVerficationResponse verifyPayment(Long orderId, String providerPaymentId, String providerSignature, String provider) {
         PaymentProviders prov = PaymentProviders.valueOf(provider.toUpperCase());
         PaymentGateWay gateWay = getPaymentGateway(prov);
-        gateWay.handleWebhook(payload, Map.of());
+
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new RuntimeException("Payment not found for orderId: " + orderId));
+
+        // ✅ Gateway verifies signature and updates PaymentStatus
+        boolean verified = gateWay.verifyPayment(payment.getProviderOrderId(), providerPaymentId, providerSignature);
+
+        if (verified && payment.getPaymentStatus() != PaymentStatus.SUCCESS) {
+            Order order = payment.getOrder();
+            order.setStatus(OrderStatus.CONFIRMED);
+            orderRepository.save(order);
+
+
+            ticketService.generateTickets(order.getId());
+
+            log.info("🎟 Payment verified & tickets generated for order {}", order.getId());
+        }
+
+        return new PayamentVerficationResponse(verified, verified ? "SUCCESS" : "FAILED");
     }
+
+
 
     @Override
     public PaymentRefundResponse refundPayment(Long paymentId, Double amount, String provider) {

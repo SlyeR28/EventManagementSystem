@@ -5,12 +5,15 @@ import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PaymentRefundRespon
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PaymentResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.PaymentRequest;
 
+import java.util.Map;
+
 public interface PaymentService {
 
     PaymentResponse makePayment(PaymentRequest paymentRequest);
-    PayamentVerficationResponse verifyPayment(Long orderId, Long paymentId, String provider);
+
+    PayamentVerficationResponse verifyPayment(Long orderId, String providerPaymentId, String providerSignature, String provider);
 
     PaymentRefundResponse refundPayment(Long paymentId, Double amount, String provider);
 
-    void handleWebhook(String provider, String payload);
+    void handleWebhook(String provider, String payload, Map<String, String> headers);
 }

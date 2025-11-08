@@ -9,6 +9,7 @@ import org.rishabh.eventmanagementsystemadvanced.Services.OrderItemService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,10 +23,10 @@ public class OrderItemServiceImpl implements OrderItemService {
 
     @Override
     public List<OrderItemResponse> getItemsByEventId(Long eventId) {
-        // ✅ Fetch with event & ticketType eagerly to avoid LazyInitializationException
+        if (eventId == null) return Collections.emptyList();
+
         List<OrderItem> items = orderItemRepository.findByEventIdWithRelations(eventId);
 
-        // ✅ Convert to response using mapper
         return items.stream()
                 .map(orderItemMapper::toResponse)
                 .collect(Collectors.toList());
@@ -33,6 +34,8 @@ public class OrderItemServiceImpl implements OrderItemService {
 
     @Override
     public List<OrderItemResponse> getItemsByOrderId(Long orderId) {
+        if (orderId == null) return Collections.emptyList();
+
         List<OrderItem> items = orderItemRepository.findByOrderIdWithRelations(orderId);
 
         return items.stream()
@@ -43,12 +46,14 @@ public class OrderItemServiceImpl implements OrderItemService {
     @Transactional
     @Override
     public void saveAll(List<OrderItem> orderItemList) {
+        if (orderItemList == null || orderItemList.isEmpty()) return;
         orderItemRepository.saveAll(orderItemList);
     }
 
     @Transactional
     @Override
     public void deleteByOrderId(Long orderId) {
+        if (orderId == null) return;
         orderItemRepository.deleteByOrderId(orderId);
     }
 }

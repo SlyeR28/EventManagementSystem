@@ -170,19 +170,22 @@ public class EventServiceImpl implements EventService {
             throw new EventUpdateException("You are not authorized to reschedule this event");
         }
 
-        event.setStartTime(request.getSalesStartTime());
-        event.setEndTime(request.getSalesEndTime());
+        event.setSalesStartTime(request.getSalesStartTime());
+        event.setSalesEndTime(request.getSalesEndTime());
+
+
         event.setStatus(EventStatus.PUBLISHED);
 
         Event saved = eventRepository.save(event);
 
-        // notification for ticket sales are live
+
         domainEventPublisher.publish(
                 new TicketSalesStartedEvent(this, saved.getId(), saved.getName())
         );
 
-        return eventMapper.toDto(eventRepository.save(saved));
+        return eventMapper.toDto(saved);
     }
+
 
     @Override
     public void autoUpdateEvent(Event event) {

@@ -23,15 +23,15 @@ public interface TicketMapper {
     TicketResponse toResponse(Ticket ticket);
 
 
-    @Named("mapValidations")
-    default List<ValidationResponse> mapValidations(List<TicketValidation> validations) {
-        return validations.stream()
-                .map(v -> ValidationResponse.builder()
-                        .id(v.getId())
-                        .validationStatus(v.getValidationStatus())
-                        .validationMethod(v.getValidationMethod())
-                        .createdAt(v.getCreatedAt())
-                        .build())
-                .collect(Collectors.toList());
-    }
+//    @Named("mapValidations")
+//    default List<ValidationResponse> mapValidations(List<TicketValidation> validations) {
+//        return validations.stream()
+//                .map(v -> ValidationResponse.builder()
+//                        .id(v.getId())
+//                        .validationStatus(v.getValidationStatus())
+//                        .validationMethod(v.getValidationMethod())
+//                        .createdAt(v.getCreatedAt())
+//                        .build())
+//                .collect(Collectors.toList());
+//    }
 }

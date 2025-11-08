@@ -66,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
         // 5️⃣ Mark cart as checked out
         cart.setCheckedOut(true);
         cartRepository.save(cart);
-        cartService.clearCart(cart.getId());
+
 
         // 6️⃣ Map to DTO
         return orderMapper.toResponse(savedOrder);
