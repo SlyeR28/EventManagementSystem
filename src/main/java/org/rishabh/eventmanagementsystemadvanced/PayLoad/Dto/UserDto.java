@@ -6,14 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.Role;
 
-
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDto {
+public class UserDto  implements java.io.Serializable {
 
     private Long id;
     private String fullName;
@@ -23,4 +22,5 @@ public class UserDto {
     private String activationCode;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
+
 }

@@ -1,15 +1,17 @@
 package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.Role;
-import org.rishabh.eventmanagementsystemadvanced.Security.Services.CustomUserDetails;
-import org.springframework.data.domain.*;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.User;
+import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.Role;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.UserMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.UserDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.UserRequest;
 import org.rishabh.eventmanagementsystemadvanced.Repository.UserRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.UserService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -52,6 +54,7 @@ public class UserSerivceImpl implements UserService {
                 }).orElse(false);
     }
 
+    @CachePut(value = "users", key = "#result.id")
     @Override
     public UserDto updateUser(Long userId, UserRequest userRequest) {
         User user = userRepository.findById(userId)
@@ -62,6 +65,7 @@ public class UserSerivceImpl implements UserService {
         return  userMapper.toDto(saved);
     }
 
+    @CacheEvict(value = "users", key = "#id")
     @Override
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
@@ -69,6 +73,10 @@ public class UserSerivceImpl implements UserService {
         userRepository.delete(user);
     }
 
+    @Cacheable(
+            value = "usersByRole",
+            key = "T(String).format('%s_%d_%d_%s_%s', #role, #page, #size, #sortBy, #sortDir)"
+    )
     @Override
     public Page<UserDto> getAllUsersByRole(Role role, int page , int size , String sortBy , String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?
@@ -79,6 +87,8 @@ public class UserSerivceImpl implements UserService {
         return byRole.map(userMapper::toDto);
     }
 
+
+    @Cacheable(value = "users" , key = "#id")
     @Override
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)

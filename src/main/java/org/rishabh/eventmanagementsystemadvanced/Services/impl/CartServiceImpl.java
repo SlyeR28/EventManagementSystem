@@ -1,6 +1,7 @@
 package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.Cache;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Cart;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.CartItem;
 import org.rishabh.eventmanagementsystemadvanced.Exception.CartNotFoundException;
@@ -9,6 +10,7 @@ import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.CartResponse;
 import org.rishabh.eventmanagementsystemadvanced.Repository.CartItemRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.CartRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.CartService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,7 @@ public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final CartMapper cartMapper;
+
 
     @Transactional(readOnly = true)
     @Override

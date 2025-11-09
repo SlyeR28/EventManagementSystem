@@ -7,6 +7,7 @@ import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.UserDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.UserRequest;
 import org.rishabh.eventmanagementsystemadvanced.Services.UserService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +50,7 @@ public class UserController {
             return ResponseEntity.ok(updated);
         }
     }
+
 
      @GetMapping("/single/{id}")
      public ResponseEntity<UserDto>getUser(@PathVariable Long id){
