@@ -11,9 +11,9 @@
 <script>
     document.getElementById("payBtn").onclick = async function() {
         try {
-            const orderId = 1; // Replace with actual order ID
-            const amount = 34991.0; // Amount in INR (backend expects double)
-            const email = "priya.mehta@example.org";
+            const orderId = 8 // Replace with actual order ID
+            const amount = 8997; // Amount in INR (backend expects double)
+            const email = "aditya_singh@outlook.com";
 
             // 1️⃣ Create payment via backend
             const createRes = await fetch(`/api/payments/create/razorpay`, {

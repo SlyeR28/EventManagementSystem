@@ -56,6 +56,10 @@ public class PaymentServiceImpl implements PaymentService {
         Order order = orderRepository.findById(paymentRequest.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
+        paymentRepository.findByOrderId(order.getId()).ifPresent(existing -> {
+            throw new RuntimeException("Payment already exists for order " + order.getId());
+        });
+
         PaymentProviders provider = paymentRequest.getPaymentProviders() != null
                 ? paymentRequest.getPaymentProviders()
                 : PaymentProviders.RAZORPAY;

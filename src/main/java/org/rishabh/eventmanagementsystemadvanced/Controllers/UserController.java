@@ -10,6 +10,7 @@ import org.rishabh.eventmanagementsystemadvanced.Services.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,7 +56,7 @@ public class UserController {
         return ResponseEntity.ok(user);
      }
 
-
+    @PreAuthorize("hasRole('ADMIN')")
      @GetMapping("/")
     public ResponseEntity<Page<UserDto>>getAllUsers(
             @RequestParam(defaultValue = "0" , required = false)int page,
