@@ -24,6 +24,7 @@ public class CartServiceImpl implements CartService {
     private final CartMapper cartMapper;
 
 
+    @Cacheable(value = "userCarts", key = "#userId")
     @Transactional(readOnly = true)
     @Override
     public CartResponse viewCart(Long userId) {

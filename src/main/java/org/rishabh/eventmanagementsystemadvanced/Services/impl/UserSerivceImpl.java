@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.User;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.Role;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.UserMapper;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PagedResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.UserDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.UserRequest;
 import org.rishabh.eventmanagementsystemadvanced.Repository.UserRepository;
@@ -17,9 +18,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +33,7 @@ public class UserSerivceImpl implements UserService {
     private final UserMapper userMapper;
     private final MailService mailService;
 
-
+    @CacheEvict(value = {"userByRole" , "Users"} , allEntries = true)
     @Override
     public UserDto createUser(UserRequest userRequest) {
         User entity = userMapper.toEntity(userRequest);
@@ -54,7 +57,8 @@ public class UserSerivceImpl implements UserService {
                 }).orElse(false);
     }
 
-    @CachePut(value = "users", key = "#result.id")
+    @CacheEvict(value = {"userByRole"} , allEntries = true)
+    @CachePut(value = "users", key = "#userId")
     @Override
     public UserDto updateUser(Long userId, UserRequest userRequest) {
         User user = userRepository.findById(userId)
@@ -73,18 +77,30 @@ public class UserSerivceImpl implements UserService {
         userRepository.delete(user);
     }
 
+    // having some issues i ll solve later
     @Cacheable(
             value = "usersByRole",
             key = "T(String).format('%s_%d_%d_%s_%s', #role, #page, #size, #sortBy, #sortDir)"
     )
     @Override
-    public Page<UserDto> getAllUsersByRole(Role role, int page , int size , String sortBy , String sortDir) {
+    public PagedResponse<UserDto> getAllUsersByRole(Role role, int page , int size , String sortBy , String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?
                 Sort.by(sortBy).ascending():
                 Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<User> byRole = userRepository.findByRole(role, pageable);
-        return byRole.map(userMapper::toDto);
+        List<UserDto> content = byRole.getContent().stream()
+                .map(userMapper::toDto)
+                .collect(Collectors.toList());
+
+                return new PagedResponse<>(
+                        content,
+                        byRole.getNumber(),
+                        byRole.getSize(),
+                        byRole.getTotalElements(),
+                        byRole.getTotalPages(),
+                        byRole.isLast()
+                );
     }
 
 
@@ -96,15 +112,23 @@ public class UserSerivceImpl implements UserService {
         return userMapper.toDto(user);
     }
 
+    @Cacheable(value = "userlist" , key = "'all_'+#page+'_'+#size+'_'+#sortBy+'_'+#sortDir")
     @Override
-    public Page<UserDto> getAllUsers(int page, int size, String sortBy, String sortDir) {
+    public PagedResponse<UserDto> getAllUsers(int page, int size, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())?
                 Sort.by(sortBy).ascending():
                 Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<User>userPage = userRepository.findAll(pageable);
         List<UserDto> userDtos = userPage.getContent().stream().map(userMapper::toDto).toList();
-        return new PageImpl<>(userDtos ,  pageable, userPage.getTotalElements());
+        return new PagedResponse<>(
+                userDtos,
+                userPage.getNumber(),
+                userPage.getSize(),
+                userPage.getTotalElements(),
+                userPage.getTotalPages(),
+                userPage.isLast()
+        );
     }
 
     @Override

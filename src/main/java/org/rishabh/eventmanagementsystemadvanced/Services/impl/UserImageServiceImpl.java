@@ -11,6 +11,8 @@ import org.rishabh.eventmanagementsystemadvanced.Repository.ImageRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.UserRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.ImageBase;
 import org.rishabh.eventmanagementsystemadvanced.Services.UserImageService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,6 +34,7 @@ public class UserImageServiceImpl extends ImageBase implements UserImageService 
         this.imageUrlGenerator = imageUrlGenerator;
     }
 
+    @CacheEvict(value = "userImage" , key = "#userId")
     @Override
     public ImageInfo uploadUserImage(MultipartFile file, Long userId) throws IOException {
 
@@ -68,6 +71,7 @@ public class UserImageServiceImpl extends ImageBase implements UserImageService 
         return uploadImage;
     }
 
+    @Cacheable(value = {"userImage" , "users"}, key = "#userId")
     @Override
     public String getUserImageUrl(Long userId) throws IOException {
         // finding the current user in which we want to upload iamge
@@ -81,9 +85,10 @@ public class UserImageServiceImpl extends ImageBase implements UserImageService 
         return imageUrlGenerator.generateImageUrl(user.getProfileImage().getPublicId());
     }
 
+    @CacheEvict(value = "userImage" , key = "#userId")
     @Override
     public void deleteUserImage(Long userId) throws IOException {
-        // finding the current user in which we want to upload iamge
+        // finding the current user in which we want to upload image
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User Not Found " + userId));

@@ -4,10 +4,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.Role;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PagedResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.UserDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.UserRequest;
 import org.rishabh.eventmanagementsystemadvanced.Services.UserService;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,18 +60,18 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
      @GetMapping("/")
-    public ResponseEntity<Page<UserDto>>getAllUsers(
+    public ResponseEntity<PagedResponse<UserDto>>getAllUsers(
             @RequestParam(defaultValue = "0" , required = false)int page,
             @RequestParam(defaultValue = "10" , required = false)int size,
             @RequestParam(defaultValue = "id" , required = false)String sortBy,
             @RequestParam(defaultValue = "asc" , required = false)String sortDir
      ){
-         Page<UserDto> user = userService.getAllUsers(page , size , sortBy , sortDir);
+         PagedResponse<UserDto> user = userService.getAllUsers(page , size , sortBy , sortDir);
          return  ResponseEntity.ok(user);
      }
 
     @GetMapping("/filter")
-    public ResponseEntity<Page<UserDto>>getAllUsersByRoles(
+    public ResponseEntity<PagedResponse<UserDto>>getAllUsersByRoles(
             @RequestParam Role role,
             @RequestParam(defaultValue = "0" , required = false)int page,
             @RequestParam(defaultValue = "10" , required = false)int size,
@@ -79,7 +79,7 @@ public class UserController {
             @RequestParam(defaultValue = "asc" , required = false)String sortDir
     ) {
 
-        Page<UserDto> usersByRole = userService.getAllUsersByRole(role, page, size, sortBy, sortDir);
+        PagedResponse<UserDto> usersByRole = userService.getAllUsersByRole(role, page, size, sortBy, sortDir);
         return  ResponseEntity.ok(usersByRole);
     }
 

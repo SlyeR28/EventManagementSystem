@@ -7,6 +7,8 @@ import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.CategoryDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.CategoryRequest;
 import org.rishabh.eventmanagementsystemadvanced.Repository.CategoryRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.CategoryService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,7 @@ public class CategoryServiceImpl implements CategoryService {
    private final CategoryMapper  categoryMapper;
 
 
+    @CacheEvict(value = "categories" , allEntries = true)
     @Override
     public CategoryDto createCategory(CategoryRequest categoryRequest) {
         Category entity = categoryMapper.toEntity(categoryRequest);
@@ -28,6 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toDto(saved);
     }
 
+    @CacheEvict(value = "categories" , allEntries = true)
     @Override
     @Transactional
     public CategoryDto updateCategory(Long id, CategoryRequest categoryRequest) {
@@ -38,6 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toDto(category);
     }
 
+
     @Override
     @Transactional(readOnly = true)
     public List<CategoryDto> getAllCategories() {
@@ -45,6 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
         return all.stream().map(categoryMapper::toDto).collect(Collectors.toList());
     }
 
+    @Cacheable(value = "categories" , key = "#id")
     @Override
     @Transactional(readOnly = true)
     public CategoryDto getCategory(Long id) {
@@ -53,6 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toDto(category);
     }
 
+    @CacheEvict(value = "categories" ,  allEntries = true)
     @Override
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id).

@@ -8,6 +8,8 @@ import org.rishabh.eventmanagementsystemadvanced.Repository.EventRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.ImageRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.EventImageService;
 import org.rishabh.eventmanagementsystemadvanced.Services.ImageBase;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +38,7 @@ public class EventImageServiceImpl extends ImageBase implements EventImageServic
     }
 
 
+    @CacheEvict(value = "eventImages", key = "#eventId")
     @Override
     public List<ImageInfo> uploadEventImage(List<MultipartFile> files, Long eventId) {
         Event event = eventRepository.findById(eventId)
@@ -76,6 +79,8 @@ public class EventImageServiceImpl extends ImageBase implements EventImageServic
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "eventImages" , key = "#eventId")
+    @Transactional(readOnly = true)
     @Override
     public List<ImageInfo> getEvetImages(Long eventId) {
         Event event = eventRepository.findById(eventId)
@@ -89,7 +94,7 @@ public class EventImageServiceImpl extends ImageBase implements EventImageServic
                 )).collect(Collectors.toList());
 
     }
-
+    @CacheEvict(value = "eventImage" , key = "#eventId")
     @Override
     public void deleteEventImages(Long eventId) {
         Event event = eventRepository.findById(eventId)
@@ -102,6 +107,7 @@ public class EventImageServiceImpl extends ImageBase implements EventImageServic
 
     }
 
+    @CacheEvict(value = "eventImage" , key = "#eventId")
     @Override
     public void deleteEventImage(Long eventId, String publicId) {
         Event event = eventRepository.findById(eventId)

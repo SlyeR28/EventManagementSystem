@@ -19,6 +19,10 @@ import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifec
 import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifecycle.EventDraftCreatedEvent;
 import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifecycle.TicketSalesStartedEvent;
 import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifecycle.UpdatedEvent;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +42,7 @@ public class EventServiceImpl implements EventService {
     private final DomainEventPublisher domainEventPublisher;
 
 
+    @CacheEvict(value = {"eventlist" , "events"} , allEntries = true)
     @Override
     public EventDto createEvent(Long organizerId, EventRequest eventRequest) {
 
@@ -67,6 +72,8 @@ public class EventServiceImpl implements EventService {
 
 
 
+    @CacheEvict(value = "eventList" ,  allEntries = true)
+    @CachePut(value = "events" , key = "#eventId")
     @Override
     public EventDto updateEvent(Long organizerId, Long eventId, EventRequest eventRequest) {
 
@@ -93,6 +100,7 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toDto(updated);
     }
 
+    @Cacheable(value = "events" , key = "#eventId")
     @Transactional(readOnly = true)
     @Override
     public EventDto getEvent(Long eventId) {
@@ -110,6 +118,12 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
+
+    @Caching(evict = {
+            @CacheEvict(value = "events", key = "#eventId"),
+            @CacheEvict(value = "eventList", allEntries = true),
+            @CacheEvict(value = "eventsByOrganizer", key = "#organizerId")
+    })
     @Override
     public void deleteEvent(Long organizerId, Long eventId) {
         Event event = eventRepository.findById(eventId)
@@ -124,7 +138,10 @@ public class EventServiceImpl implements EventService {
 
         eventRepository.delete(event);
     }
-
+    @Cacheable(
+            value = "eventsByOrganizer",
+            key = "#organizerId"
+    )
     @Transactional(readOnly = true)
     @Override
     public List<EventDto> getEventsByOrganizerId(Long organizerId) {
