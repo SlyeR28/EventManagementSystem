@@ -17,6 +17,8 @@ import org.rishabh.eventmanagementsystemadvanced.Repository.PaymentRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.PaymentGateWay;
 import org.rishabh.eventmanagementsystemadvanced.Services.PaymentService;
 import org.rishabh.eventmanagementsystemadvanced.Services.TicketService;
+import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.DomainEventPublisher;
+import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.PaymentLifeCycle.PaymentCompleted;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +27,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-@Slf4j
+
 @Transactional
 @Service
 @RequiredArgsConstructor
@@ -37,6 +39,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final TicketService ticketService;
+    private final DomainEventPublisher  domainEventPublisher;
 
 
     @PostConstruct
@@ -82,7 +85,7 @@ public class PaymentServiceImpl implements PaymentService {
         gatewayResponse.setPaymentId(payment.getId());
         gatewayResponse.setTransactionId(payment.getTransactionId());
 
-        log.info("🧾 Payment created for order {} with providerOrderId {}", order.getId(), payment.getProviderOrderId());
+
         return gatewayResponse;
     }
 
@@ -112,7 +115,10 @@ public class PaymentServiceImpl implements PaymentService {
 
             ticketService.generateTickets(order.getId());
 
-            log.info("🎟 Payment verified & tickets generated for order {}", order.getId());
+            domainEventPublisher.publish(
+                    new PaymentCompleted(this , payment.getAmount(), order.getUser().getId() , orderId)
+            );
+
         }
 
         return new PayamentVerficationResponse(verified, verified ? "SUCCESS" : "FAILED");

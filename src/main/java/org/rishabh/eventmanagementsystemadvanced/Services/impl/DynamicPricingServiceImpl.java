@@ -7,8 +7,13 @@ import org.rishabh.eventmanagementsystemadvanced.Repository.TicketTypeRepository
 import org.rishabh.eventmanagementsystemadvanced.Services.DynamicPricingService;
 import org.rishabh.eventmanagementsystemadvanced.Utils.DynamicPricingEngine.DynamicPriceEngine;
 import org.rishabh.eventmanagementsystemadvanced.Utils.DynamicPricingEngine.DynamicPricingFactory;
+import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.CartLifeCycle.TicketSalesThresholdEvent;
+import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.DomainEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Service
 @RequiredArgsConstructor
@@ -16,17 +21,51 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
 
     private final TicketTypeRepository  ticketTypeRepository;
     private final DynamicPricingFactory dynamicPricingFactory;
+    private final DomainEventPublisher domainEventPublisher;
+
+    private static final double NOTIFICATION_THRESHOLD = 0.75;
 
 
     @Transactional
     @Override
-    public TicketType applyPricing(Long ticketTypeId, PricingStrategyType strategyType){
+    public TicketType applyPricing(Long ticketTypeId, PricingStrategyType strategyType) {
         TicketType ticketType = ticketTypeRepository.findById(ticketTypeId)
                 .orElseThrow(() -> new RuntimeException("Ticket Type Not Found"));
-         DynamicPriceEngine engine = dynamicPricingFactory.getStrategy(strategyType);
-        engine.applyDynamicPricing(ticketType);
-       return ticketTypeRepository.save(ticketType);
 
-    }
+        Double oldPrice = ticketType.getCurrentPrice();
+
+        DynamicPriceEngine engine = dynamicPricingFactory.getStrategy(strategyType);
+        engine.applyDynamicPricing(ticketType);
+
+        if (strategyType == PricingStrategyType.DEMAND_BASED) {
+            int soldQuantity = ticketType.getTotalQuantity() - ticketType.getRemainingQuantity();
+
+            if (ticketType.getTotalQuantity() > 0) {
+                double soldRatio = (double) soldQuantity / ticketType.getTotalQuantity();
+                if (soldRatio >= NOTIFICATION_THRESHOLD && !ticketType.getCurrentPrice().equals(oldPrice)) {
+                    if (ticketType.getEvent() != null) {
+
+                        // 3. Publish the event with the necessary dynamic data
+                        domainEventPublisher.publish(
+                                new TicketSalesThresholdEvent(
+                                        this,
+                                        ticketType.getEvent().getId(),
+                                        ticketType.getEvent().getName(),
+                                        soldRatio,
+                                        // Use BigDecimal for currency handling
+                                        BigDecimal.valueOf(ticketType.getCurrentPrice()).setScale(2, RoundingMode.HALF_UP),
+                                        ticketType.getRemainingQuantity()
+                                )
+                        );
+
+                    }
+                }
+            }
+        }
+
+            return ticketTypeRepository.save(ticketType);
+
+        }
+
 
 }

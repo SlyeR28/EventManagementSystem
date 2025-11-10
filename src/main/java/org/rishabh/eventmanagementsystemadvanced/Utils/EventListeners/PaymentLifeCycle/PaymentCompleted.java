@@ -10,10 +10,12 @@ public class PaymentCompleted extends ApplicationEvent {
     private final Double amount;
     private final Long orderId;
 
+
     public PaymentCompleted(Object source, Double amount, Long userId, Long orderId) {
         super(source);
         this.amount = amount;
         this.userId = userId;
         this.orderId = orderId;
+
     }
 }

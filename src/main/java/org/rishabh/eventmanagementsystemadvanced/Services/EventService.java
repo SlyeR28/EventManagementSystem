@@ -1,6 +1,5 @@
 package org.rishabh.eventmanagementsystemadvanced.Services;
 
-import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Event;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.EventDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.EventRequest;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.SalesTimeRequest;
@@ -28,5 +27,5 @@ public interface  EventService {
 
     EventDto startSalesTime(Long organizerId, Long eventId, SalesTimeRequest request);
 
-    void autoUpdateEvent(Event event);
+
 }

@@ -62,6 +62,8 @@ public class EventServiceImpl implements EventService {
 
         Event saved = eventRepository.save(event);
 
+
+
         // ✅ Publish event for Notification listener
         domainEventPublisher.publish(
                 new EventDraftCreatedEvent(this, saved.getId(), saved.getName(), EventStatus.DRAFT)
@@ -203,17 +205,4 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toDto(saved);
     }
 
-
-    @Override
-    public void autoUpdateEvent(Event event) {
-        LocalDateTime now = LocalDateTime.now();
-        if (event.getStatus() == EventStatus.PUBLISHED) {
-            if (now.isAfter(event.getStartTime()) && now.isBefore(event.getEndTime())) {
-                event.setStatus(EventStatus.ONGOING);
-            } else if (now.isAfter(event.getEndTime())) {
-                event.setStatus(EventStatus.COMPLETED);
-            }
-            eventRepository.save(event);
-        }
-    }
 }

@@ -1,6 +1,7 @@
 package org.rishabh.eventmanagementsystemadvanced.Repository;
 
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Event;
+import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.EventStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -11,4 +12,5 @@ public interface EventRepository extends JpaRepository<Event,Long>{
     List<Event> findByCategory_Id(Long categoryId);
 
 
+    List<Event> findAllByStatusIn(List<EventStatus> published);
 }
