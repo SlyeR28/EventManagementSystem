@@ -8,7 +8,6 @@ import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PagedResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.UserDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.UserRequest;
 import org.rishabh.eventmanagementsystemadvanced.Services.UserService;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

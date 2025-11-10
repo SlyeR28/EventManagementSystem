@@ -7,15 +7,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;
 
-//@Repository
-//public interface EventSearchRepository extends ElasticsearchRepository<EventDocument, String> {
-//
-//    Page<EventDocument> findByOrganizerNameContainingIgnoreCase(String organizerName ,  Pageable pageable);
-//
-//    Page<EventDocument> findByNameContainingIgnoreCase(String name, Pageable pageable);
-//
-//    Page<EventDocument> findByVenueContainingIgnoreCase(String venue, Pageable pageable);
-//
-//    Page<EventDocument> findByCategoryContainingIgnoreCase(String category, Pageable pageable);
-//
-//}
+import java.util.Collection;
+import java.util.List;
+
+@Repository
+public interface EventSearchRepository extends ElasticsearchRepository<EventDocument, Long> {
+
+    Page<EventDocument> findByStatusInAndNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            List<String> statuses,
+            String nameKeyword,
+            String descriptionKeyword,
+            Pageable pageable
+
+    );
+
+    List<EventDocument>findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String nameKeyword, String descriptionKeyword);
+
+}

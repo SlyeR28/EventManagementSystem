@@ -1,5 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Services;
 
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PagedResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.SearchRequest;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.EventSearchResponse;
 
@@ -8,20 +9,19 @@ import java.util.List;
 public interface EventSearchService {
 
 
-    void indexEvent(EventSearchResponse response);
+    void indexEvent(Long eventId);
 
 
-    void deleteIndexedEvent(String eventId);
+    void deleteIndexedEvent(Long eventId);
 
-
+    // Re-index all events (useful if ES and MySQL go out of sync)
     void reindexAllEvents();
 
 
-    List<EventSearchResponse> searchEvents(SearchRequest request);
+    PagedResponse<EventSearchResponse> searchEvents(SearchRequest request);
 
 
-    List<EventSearchResponse> searchEventsWithPagination(SearchRequest request, int page, int size, String sortBy);
 
-
+    // Fuzzy search by keyword (optional for auto-suggest)
     List<EventSearchResponse> fuzzySearch(String keyword);
 }

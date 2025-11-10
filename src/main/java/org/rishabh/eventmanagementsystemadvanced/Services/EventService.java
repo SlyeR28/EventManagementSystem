@@ -5,7 +5,6 @@ import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.EventDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.EventRequest;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.SalesTimeRequest;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface  EventService {
