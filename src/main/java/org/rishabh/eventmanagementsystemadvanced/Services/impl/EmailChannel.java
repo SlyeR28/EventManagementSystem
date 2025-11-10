@@ -30,7 +30,7 @@ public class EmailChannel implements NotificationChannel {
 
         String email = req.getUserEmail();
 
-       if(req.getUserEmail()==null || req.getUserEmail().isBlank()){
+       if(email == null ||email.isBlank()){
            User user = userRepository.findById(req.getUserId())
                    .orElseThrow(() -> new IllegalArgumentException("User not found for ID: " + req.getUserId()));
 
@@ -42,10 +42,9 @@ public class EmailChannel implements NotificationChannel {
        try{
            MimeMessage message = mailSender.createMimeMessage();
            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-           helper.setTo(req.getUserEmail());
+           helper.setTo(email);
            helper.setSubject(req.getSubject() != null ? req.getSubject() : "(no subject)");
            helper.setText(req.getMessage() != null ? req.getMessage() : " ", true);
-
            mailSender.send(message);
        }catch (MessagingException e){
            throw new RuntimeException("Error while sending email to " + req.getUserEmail(),e);

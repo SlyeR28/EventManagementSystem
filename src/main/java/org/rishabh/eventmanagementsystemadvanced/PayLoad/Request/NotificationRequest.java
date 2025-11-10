@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,4 +19,6 @@ public class NotificationRequest
     private String subject;
     private String message;
     private String templateCode;
+    @Builder.Default
+    private Map<String, Object> variables = new HashMap<>();
 }

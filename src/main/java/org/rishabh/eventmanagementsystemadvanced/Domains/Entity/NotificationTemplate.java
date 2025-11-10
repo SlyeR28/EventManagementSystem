@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.ChannelType;
 
+import java.util.Set;
 
 
 @Entity
@@ -31,7 +32,9 @@ public class NotificationTemplate {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String body;
 
+    @ElementCollection(targetClass = ChannelType.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "template_channels", joinColumns = @JoinColumn(name = "template_id"))
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ChannelType channel;
+    @Column(name = "channel_type", nullable = false)
+    private Set<ChannelType> channels;
 }

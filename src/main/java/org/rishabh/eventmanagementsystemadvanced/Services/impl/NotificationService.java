@@ -24,36 +24,37 @@ public class NotificationService {
 
     @Async("notifExecutor")
     public void sendNotification(NotificationRequest req) {
-        // Fetch template
-        NotificationTemplate template = templateService.findByCode(req.getTemplateCode())
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Template code not found: " + req.getTemplateCode()));
 
-        // Render template message
-        String message = templateService.render(template.getBody(), Map.of(
-                "userId", req.getUserId(),
-                "message", req.getMessage() != null ? req.getMessage() : ""
-        ));
-        req.setMessage(message);
-        req.setSubject(template.getSubject());
+            NotificationTemplate template = templateService.findByCode(req.getTemplateCode())
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Template code not found: " + req.getTemplateCode()));
 
-        // Fetch user preferences
-        Optional<UserPrefernces> prefOpt = userPreferncesRepository.findByUserId(req.getUserId());
-        boolean sendEmail = true;
-        boolean sendPopup = true;
 
-        if (prefOpt.isPresent()) {
-            sendEmail = prefOpt.get().isEmailEnabled();
-            sendPopup = prefOpt.get().isPopupEnabled();
-        }
+            String renderedMessage = templateService.render(template.getBody(), req.getVariables());
+            req.setMessage(renderedMessage);
+            req.setSubject(template.getSubject());
 
-        // Send via enabled channels only
-        if (template.getChannel() == ChannelType.EMAIL && sendEmail) {
-            sendToChannel(template.getChannel(), req);
-        } else if (template.getChannel() == ChannelType.POPUP && sendPopup) {
-            sendToChannel(template.getChannel(), req);
-        }
+
+            Optional<UserPrefernces> prefOpt = userPreferncesRepository.findByUserId(req.getUserId());
+            boolean emailEnabled = prefOpt.map(UserPrefernces::isEmailEnabled).orElse(true);
+            boolean popupEnabled = prefOpt.map(UserPrefernces::isPopupEnabled).orElse(true);
+
+
+            for (ChannelType channelType : template.getChannels()) {
+                boolean userHasEnabledChannel = false;
+
+                if (channelType == ChannelType.EMAIL) {
+                    userHasEnabledChannel = emailEnabled;
+                } else if (channelType == ChannelType.POPUP) {
+                    userHasEnabledChannel = popupEnabled;
+                }
+
+                if (userHasEnabledChannel) {
+                    sendToChannel(channelType, req);
+
+                }
+            }
     }
 
 

@@ -8,12 +8,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class SimpleTemplateService  implements TemplateService {
 
     private final NotificationTemplateRepository templateRepository;
+
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{\\{(\\w+)\\}\\}");
 
 
     @Override
@@ -26,10 +30,16 @@ public class SimpleTemplateService  implements TemplateService {
         if (template == null) return "";
         if (vars == null || vars.isEmpty()) return template;
 
-        String result = template;
-        for (var entry : vars.entrySet()) {
-            result = result.replace("{{" + entry.getKey() + "}}", String.valueOf(entry.getValue()));
+        Matcher matcher = PLACEHOLDER_PATTERN.matcher(template);
+        StringBuffer result = new StringBuffer();
+
+        while (matcher.find()) {
+            String key = matcher.group(1); // The content inside {{...}}
+            Object value = vars.getOrDefault(key, "{" + key + "}"); // Fallback to placeholder if key is missing
+            matcher.appendReplacement(result, Matcher.quoteReplacement(String.valueOf(value)));
         }
-        return result;
+        matcher.appendTail(result);
+
+        return result.toString();
     }
 }

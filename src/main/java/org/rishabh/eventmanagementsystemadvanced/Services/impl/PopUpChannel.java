@@ -26,7 +26,8 @@ public class PopUpChannel implements NotificationChannel {
         String destination = "/topic/notifications/" + req.getUserId();
         simpMessagingTemplate.convertAndSend(destination, java.util.Map.of(
                 "subject", req.getSubject(),
-                "message", req.getMessage()
+                "message", req.getMessage(),
+                "timestamp", System.currentTimeMillis()
         ));
     }
 }

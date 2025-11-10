@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -21,6 +22,22 @@ public class NotificationEventListener {
     private final UserRepository userRepository;
 
 
+    private NotificationRequest buildNotificationRequest(User user, String templateCode, Map<String, Object> variables) {
+
+        variables = new java.util.HashMap<>(variables);
+        variables.put("fullName", user.getFullName());
+
+        return NotificationRequest.builder()
+                .userId(user.getId())
+                .userEmail(user.getEmail())
+
+                .templateCode(templateCode)
+                .variables(variables)
+                .build();
+    }
+
+
+
     @Async("notifExecutor")
     @EventListener
     public void handleTicketSalesStarted(TicketSalesStartedEvent event) {
@@ -28,56 +45,59 @@ public class NotificationEventListener {
         int size = 1000;
         Page<User> users;
 
+
+        Map<String, Object> eventVars = Map.of(
+                "eventName", event.getEventName(),
+                "ticketPrice", "very low price"
+        );
+
         do {
             users = userRepository.findAll(PageRequest.of(page, size));
             users.getContent().forEach(user -> {
-                NotificationRequest req = NotificationRequest.builder()
-                        .userId(user.getId())
-                        .userEmail(user.getEmail())
-                        .subject("🎟 Ticket Sales Now Open!")
-                        .message("Hi " + user.getFullName() +
-                                ", tickets for \"" + event.getEventName() + "\" are now available at ₹" + "very low price"+
-                                ". Hurry up and grab yours before they're gone!")
-                        .templateCode("TICKET_SALES_STARTED")
-                        .build();
-
+                NotificationRequest req = buildNotificationRequest(
+                        user,
+                        "TICKET_SALES_STARTED",
+                        eventVars
+                );
                 notificationService.sendNotification(req);
             });
             page++;
         } while (users.hasNext());
     }
 
+
     @Async("notifExecutor")
     @EventListener
     public void handleEventDraftCreated(EventDraftCreatedEvent event) {
         int page = 0;
-        int size = 1000; // adjust batch size as per server capacity
+        int size = 1000;
         Page<User> usersPage;
 
 
+        Map<String, Object> eventVars = Map.of(
+                "eventName", event.getEventName()
+        );
+
         do {
+
             usersPage = userRepository.findByRoleIn(
                     List.of("STAFF", "ORGANIZER", "ADMIN"),
                     PageRequest.of(page, size)
             );
 
             for (User user : usersPage.getContent()) {
-                NotificationRequest req = NotificationRequest.builder()
-                        .userId(user.getId())
-                        .userEmail(user.getEmail())
-                        .subject("📝 New Event in Draft")
-                        .message("Hi " + user.getFullName() +
-                                ", a new event \"" + event.getEventName() + "\" is now in draft state. " +
-                                "Please review and take necessary actions.")
-                        .templateCode("EVENT_DRAFT_CREATED")
-                        .build();
-
+                NotificationRequest req = buildNotificationRequest(
+                        user,
+                        "EVENT_DRAFT_CREATED",
+                        eventVars
+                );
                 notificationService.sendNotification(req);
             }
 
             page++;
         } while (usersPage.hasNext());
     }
+
 
     @Async("notifExecutor")
     @EventListener
@@ -86,22 +106,25 @@ public class NotificationEventListener {
         int size = 1000;
         Page<User> users;
 
+
+        Map<String, Object> eventVars = Map.of(
+                "eventName", event.getEventName()
+        );
+
         do {
             users = userRepository.findAll(PageRequest.of(page, size));
             users.getContent().forEach(user -> {
-                NotificationRequest req = NotificationRequest.builder()
-                        .userId(user.getId())
-                        .userEmail(user.getEmail())
-                        .subject("🚀 New Event Published!")
-                        .message("Hi " + user.getFullName() +
-                                ", a new event \"" + event.getEventName() + "\" is now live.")
-                        .templateCode("EVENT_PUBLISHED")
-                        .build();
+                NotificationRequest req = buildNotificationRequest(
+                        user,
+                        "EVENT_PUBLISHED",
+                        eventVars
+                );
                 notificationService.sendNotification(req);
             });
             page++;
         } while (users.hasNext());
     }
+
 
     @Async("notifExecutor")
     @EventListener
@@ -110,53 +133,51 @@ public class NotificationEventListener {
         int size = 1000;
         Page<User> users;
 
+
+        Map<String, Object> eventVars = Map.of(
+                "eventName", event.getEventName()
+        );
+
         do {
+
             users = userRepository.findAll(PageRequest.of(page, size));
             users.getContent().forEach(user -> {
-                NotificationRequest req = NotificationRequest.builder()
-                        .userId(user.getId())
-                        .userEmail(user.getEmail())
-                        .subject("⚠️ Event Cancelled: " + event.getEventName())
-                        .message("Dear " + user.getFullName() + ",\n\n" +
-                                "We regret to inform you that the event \"" + event.getEventName() + "\" has been cancelled.\n" +
-                                "If you’ve already purchased tickets, our support team will contact you shortly regarding refunds.\n\n" +
-                                "We apologize for the inconvenience.")
-                        .templateCode("EVENT_CANCELLED")
-                        .build();
+                NotificationRequest req = buildNotificationRequest(
+                        user,
+                        "EVENT_CANCELLED",
+                        eventVars
+                );
                 notificationService.sendNotification(req);
             });
             page++;
         } while (!users.isLast());
     }
+
 
     @Async("notifExecutor")
     @EventListener
     public void handleUpdatedEvent(UpdatedEvent event) {
-
-
         int page = 0;
         int size = 1000;
         Page<User> users;
 
+        // Variables specific to this event type
+        Map<String, Object> eventVars = Map.of(
+                "eventName", event.getEventName()
+        );
+
         do {
+           
             users = userRepository.findAll(PageRequest.of(page, size));
             users.getContent().forEach(user -> {
-                NotificationRequest req = NotificationRequest.builder()
-                        .userId(user.getId())
-                        .userEmail(user.getEmail())
-                        .subject("📝 Event Updated: " + event.getEventName())
-                        .message("Hello " + user.getFullName() + ",\n\n" +
-                                "Good news! The event \"" + event.getEventName() + "\" has been updated with new details.\n" +
-                                "Please visit the event page to check the latest information.\n\n" +
-                                "Stay tuned,\nEvent Management Team")
-                        .templateCode("EVENT_UPDATED")
-                        .build();
-
+                NotificationRequest req = buildNotificationRequest(
+                        user,
+                        "EVENT_UPDATED",
+                        eventVars
+                );
                 notificationService.sendNotification(req);
             });
             page++;
         } while (!users.isLast());
     }
-
-
 }
