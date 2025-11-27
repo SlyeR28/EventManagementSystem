@@ -2,7 +2,7 @@ package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApisResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.EventDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.EventRequest;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.SalesTimeRequest;
@@ -61,12 +61,12 @@ public class EventController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     @DeleteMapping("/delete/{organizerId}/{eventId}")
-    public ResponseEntity<ApiResponse> deleteEvent(
+    public ResponseEntity<ApisResponse> deleteEvent(
             @PathVariable Long organizerId,
             @PathVariable Long eventId) {
 
         eventService.deleteEvent(organizerId, eventId);
-        return ResponseEntity.ok(new ApiResponse("Event deleted successfully"));
+        return ResponseEntity.ok(new ApisResponse("Event deleted successfully"));
     }
 
 

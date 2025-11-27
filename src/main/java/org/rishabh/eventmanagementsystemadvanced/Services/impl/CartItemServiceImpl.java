@@ -3,8 +3,7 @@ package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.*;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PricingStrategyType;
-import org.rishabh.eventmanagementsystemadvanced.Exception.EventNotFoundException;
-import org.rishabh.eventmanagementsystemadvanced.Exception.UserNotFoundException;
+import org.rishabh.eventmanagementsystemadvanced.Exception.*;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.CartMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.CartItemResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.CartResponse;
@@ -41,7 +40,7 @@ public class CartItemServiceImpl implements CartItemService {
         Event event = eventRepository.findById(request.getEventId())
                 .orElseThrow(() -> new EventNotFoundException("Event not found : " +request.getEventId()));
         TicketType ticketType = ticketTypeRepository.findById(request.getTicketTypeId())
-                .orElseThrow(() -> new RuntimeException("Ticket Type not found"));
+                .orElseThrow(() -> new TicketTypeException("Ticket Type not found : " ));
         if(ticketType.getRemainingQuantity()<request.getQuantity()){
             throw new IllegalStateException("Ticket Quantity Exceeded");
         }
@@ -93,7 +92,8 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public CartResponse updateItemQuantity(Long userId, Long cartItemId, int newQuantity) {
-        CartItem item = cartItemRepository.findById(cartItemId).orElseThrow(() -> new RuntimeException("Item not found"));
+        CartItem item = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new CartItemNotFound("Item not found"));
 
         if(!item.getCart().getUser().getId().equals(userId)){
             throw new IllegalStateException("User not found");
@@ -116,8 +116,9 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public CartResponse removeItemFromCart(Long userId, Long cartItemId) {
-        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() -> new RuntimeException("Item not found"));
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new CartNotFoundException("User not found" +userId));
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() -> new CartItemNotFound("Item not found"));
         if(!cartItem.getCart().getUser().getId().equals(userId)){
             throw new IllegalStateException("User not found");
         }

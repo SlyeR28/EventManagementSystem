@@ -2,7 +2,7 @@ package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApisResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.TicketTypeDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.TicketTypeRequest;
 import org.rishabh.eventmanagementsystemadvanced.Services.TicketTypeService;
@@ -51,8 +51,8 @@ public class TicketTypeController {
     }
 
     @DeleteMapping("/del/{ticketTypeId}")
-    public ResponseEntity<ApiResponse> deleteTicketType(@PathVariable long ticketTypeId) {
+    public ResponseEntity<ApisResponse> deleteTicketType(@PathVariable long ticketTypeId) {
         ticketTypeService.deleteTicketType(ticketTypeId);
-        return new ResponseEntity<>(new ApiResponse("ticket type deleted successfully") , HttpStatus.OK);
+        return new ResponseEntity<>(new ApisResponse("ticket type deleted successfully") , HttpStatus.OK);
     }
 }

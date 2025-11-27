@@ -2,7 +2,7 @@ package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApisResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ImageInfo;
 import org.rishabh.eventmanagementsystemadvanced.Services.EventImageService;
 import org.springframework.data.domain.Page;
@@ -37,16 +37,16 @@ public class EventImageController {
 
 
     @DeleteMapping("/del/{eventId}")
-    public ResponseEntity<ApiResponse>deleteAllEventImage(@PathVariable("eventId") Long eventId) {
+    public ResponseEntity<ApisResponse>deleteAllEventImage(@PathVariable("eventId") Long eventId) {
        eventImageService.deleteEventImages(eventId);
-       return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Event Image Deleted Successfully"));
+       return ResponseEntity.status(HttpStatus.OK).body(new ApisResponse("Event Image Deleted Successfully"));
     }
 
 
     @DeleteMapping("/delete/{eventId}/{publicId}")
-    public ResponseEntity<ApiResponse>deleteEventImage(@PathVariable("eventId") Long eventId ,@PathVariable String publicId) {
+    public ResponseEntity<ApisResponse>deleteEventImage(@PathVariable("eventId") Long eventId ,@PathVariable String publicId) {
         eventImageService.deleteEventImage(eventId,publicId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Event Image Deleted Successfully"));
+        return ResponseEntity.status(HttpStatus.OK).body(new ApisResponse("Event Image Deleted Successfully"));
     }
 
 

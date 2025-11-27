@@ -1,8 +1,7 @@
 package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApisResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.CartResponse;
 import org.rishabh.eventmanagementsystemadvanced.Services.CartService;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +24,9 @@ public class CartController {
 
 
     @DeleteMapping("/{userId}/clear")
-    public ResponseEntity<ApiResponse> clearCart(@PathVariable Long userId) {
+    public ResponseEntity<ApisResponse> clearCart(@PathVariable Long userId) {
         cartService.clearCart(userId);
-        return ResponseEntity.ok(new ApiResponse("Cart has been cleared"));
+        return ResponseEntity.ok(new ApisResponse("Cart has been cleared"));
     }
 
 }

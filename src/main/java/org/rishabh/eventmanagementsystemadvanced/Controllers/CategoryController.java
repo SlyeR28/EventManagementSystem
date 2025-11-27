@@ -2,7 +2,7 @@ package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApisResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.CategoryDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.CategoryRequest;
 import org.rishabh.eventmanagementsystemadvanced.Services.CategoryService;
@@ -40,9 +40,9 @@ public class CategoryController {
     }
 
     @DeleteMapping("/delete/{categoryId}")
-    public  ResponseEntity<ApiResponse>deleteCategory(@Valid @PathVariable Long categoryId) {
+    public  ResponseEntity<ApisResponse>deleteCategory(@Valid @PathVariable Long categoryId) {
         categoryService.deleteCategory(categoryId);
-        return ResponseEntity.ok(new ApiResponse("Category deleted successfully"));
+        return ResponseEntity.ok(new ApisResponse("Category deleted successfully"));
     }
 
     @GetMapping("/get")

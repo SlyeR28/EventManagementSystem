@@ -3,6 +3,7 @@ package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.*;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.TicketStatus;
+import org.rishabh.eventmanagementsystemadvanced.Exception.TicketNotFoundException;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.TicketMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.TicketResponse;
 import org.rishabh.eventmanagementsystemadvanced.Repository.OrderRepository;
@@ -31,7 +32,7 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public List<TicketResponse> generateTickets(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new TicketNotFoundException("Ticket id not found : " ));
         List<Ticket> tickets = new ArrayList<>();
 
         for(OrderItem item : order.getOrderItems()) {
@@ -63,7 +64,8 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public TicketResponse getTicketById(Long id) {
-        Ticket ticket = ticketRepository.findById(id).orElseThrow(() -> new RuntimeException("Ticket not found"));
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new TicketNotFoundException("Ticket id not found : " +id));
         return ticketMapper.toResponse(ticket);
     }
 

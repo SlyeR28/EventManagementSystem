@@ -2,7 +2,7 @@ package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApisResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PayamentVerficationResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PaymentResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.PaymentRequest;
@@ -28,14 +28,14 @@ public class PaymentController {
         return ResponseEntity.ok().body(payment);
     }
     @PostMapping("/webhook/{provider}")
-    public ResponseEntity<ApiResponse> handleWebhook(
+    public ResponseEntity<ApisResponse> handleWebhook(
             @PathVariable String provider,
             @RequestBody String payload,
             @RequestHeader(value = "x-razorpay-signature", required = false) String signature
     ) {
         // Pass headers to service for secure verification
         paymentService.handleWebhook(provider, payload, Map.of("x-razorpay-signature", signature));
-        return ResponseEntity.ok().body(new ApiResponse("success"));
+        return ResponseEntity.ok().body(new ApisResponse("success"));
     }
 
     @PostMapping("/{provider}/verify")

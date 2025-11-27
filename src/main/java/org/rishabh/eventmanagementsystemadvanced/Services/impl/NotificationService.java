@@ -11,7 +11,6 @@ import org.rishabh.eventmanagementsystemadvanced.Services.TemplateService;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.Optional;
 
 @Service

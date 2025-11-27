@@ -5,6 +5,7 @@ import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Cart;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Order;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.OrderItem;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.OrderStatus;
+import org.rishabh.eventmanagementsystemadvanced.Exception.CartNotFoundException;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.OrderMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.OrderResponse;
 import org.rishabh.eventmanagementsystemadvanced.Repository.CartRepository;
@@ -26,17 +27,17 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
-    private final CartService  cartService;
+
 
 
     @Override
     public OrderResponse placeOrder(Long userId) {
         // 1️⃣ Get cart
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new CartNotFoundException("Cart id not found : " +userId));
 
         if(cart.getItems().isEmpty()) {
-            throw new RuntimeException("Cart items not found");
+            throw new CartNotFoundException("Cart items not found : " +userId );
         }
 
         // 2️⃣ Create Order entity
@@ -75,7 +76,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse viewOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("order not found"));
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new CartNotFoundException("order not found : " +orderId));
         return orderMapper.toResponse(order);
 
     }

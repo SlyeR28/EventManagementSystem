@@ -5,6 +5,8 @@ package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Event;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.TicketType;
+import org.rishabh.eventmanagementsystemadvanced.Exception.EventNotFoundException;
+import org.rishabh.eventmanagementsystemadvanced.Exception.TicketTypeException;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.TicketTypeMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.TicketTypeDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.TicketTypeRequest;
@@ -29,7 +31,7 @@ public class TicketTypeSericeImple implements TicketTypeService {
     @Override
     public TicketTypeDto createTicketType(TicketTypeRequest ticketTypeRequest) {
         Event event = eventRepository.findById(ticketTypeRequest.getEventId()).
-                orElseThrow(() -> new RuntimeException("Event id not found"));
+                orElseThrow(() -> new EventNotFoundException("Event not found :: " + ticketTypeRequest.getEventId() ));
 
         TicketType ticketTypeEntity = ticketTypeMapper.toEntity(ticketTypeRequest);
         // initialize price & qty if not set by mapper
@@ -47,7 +49,7 @@ public class TicketTypeSericeImple implements TicketTypeService {
     @Override
     public TicketTypeDto updateTicketType(Long id, TicketTypeRequest ticketTypeRequest) {
         TicketType existing = ticketTypeRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Ticket id not found"));
+                () -> new TicketTypeException("Ticket type not found : "));
         // update only mutable fields
         existing.setName(ticketTypeRequest.getName());
         existing.setBasePrice(ticketTypeRequest.getBasePrice());
@@ -61,7 +63,8 @@ public class TicketTypeSericeImple implements TicketTypeService {
     @Override
     @Transactional(readOnly = true)
     public List<TicketTypeDto> getAllTicketTypesByEventId(Long eventId) {
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event id not found"));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException("Event  not found : " + eventId));
         List<TicketType> byEventId = ticketTypeRepository.findByEventId(event.getId());
         return byEventId.stream().map(ticketTypeMapper::toResponse).collect(Collectors.toList());
     }
@@ -76,13 +79,15 @@ public class TicketTypeSericeImple implements TicketTypeService {
     @Override
     @Transactional(readOnly = true)
     public TicketTypeDto getTicketTypeById(Long id) {
-        TicketType ticketType = ticketTypeRepository.findById(id).orElseThrow(() -> new RuntimeException("Ticket id not found"));
+        TicketType ticketType = ticketTypeRepository.findById(id).orElseThrow(
+                () -> new TicketTypeException("Ticket type not found : " + id));
         return ticketTypeMapper.toResponse(ticketType);
     }
 
     @Override
     public void deleteTicketType(Long id) {
-        TicketType ticketType = ticketTypeRepository.findById(id).orElseThrow(() -> new RuntimeException("Ticket id not found"));
+        TicketType ticketType = ticketTypeRepository.findById(id)
+                .orElseThrow(() -> new TicketTypeException("Ticket id not found"));
         Event event = ticketType.getEvent();
         if (event != null) {
             event.removeTicketType(ticketType);

@@ -146,5 +146,4 @@ public class UserSerivceImpl implements UserService {
                 () -> new UsernameNotFoundException("User not found with email " + authentication.getName()));
     }
 
-
 }
