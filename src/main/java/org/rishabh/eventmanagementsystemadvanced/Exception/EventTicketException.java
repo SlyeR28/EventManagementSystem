@@ -1,6 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Exception;
 
-public class EventTicketException extends RuntimeException{
+public class EventTicketException extends EventException{
 
     public EventTicketException() {
 

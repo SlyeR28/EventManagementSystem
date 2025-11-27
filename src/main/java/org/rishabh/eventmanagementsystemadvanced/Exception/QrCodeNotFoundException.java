@@ -1,6 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Exception;
 
-public class QrCodeNotFoundException extends EventTicketException {
+public class QrCodeNotFoundException extends EventException {
     public QrCodeNotFoundException() {
     }
 

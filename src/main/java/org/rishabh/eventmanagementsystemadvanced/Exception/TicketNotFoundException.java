@@ -1,6 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Exception;
 
-public class TicketNotFoundException  extends EventTicketException{
+public class TicketNotFoundException  extends EventException{
     public TicketNotFoundException() {
     }
 

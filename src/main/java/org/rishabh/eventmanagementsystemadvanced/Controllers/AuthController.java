@@ -36,6 +36,7 @@ public class AuthController {
     private final JwtUtils  jwtUtils;
 
 
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponse>login(@Valid @RequestBody AuthRequest authRequest) {
 
@@ -57,16 +58,6 @@ public class AuthController {
             authResponse.setEmail(userDetails.getUsername());
             authResponse.setToken(token);
 
-            // --- ADD THIS BLOCK ---
-// Assuming your CustomUserDetails has the ID, or you fetch the user entity
-// If userDetails is an instance of your User entity or wraps it:
-// authResponse.setUserId(((CustomUserDetails) userDetails).getId());
-
-// OR if you need to fetch it:
-// User user = userService.getUserByEmail(authRequest.getEmail());
-// authResponse.setUserId(user.getId());
-// ----------------------
-
             if (userDetails instanceof CustomUserDetails) {
                 authResponse.setUserId(((CustomUserDetails) userDetails).getId());
             }
@@ -79,9 +70,5 @@ public class AuthController {
     //logout
     //password change
     //forget password
-    //delete account
- 
-
-
 
 }

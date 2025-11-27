@@ -1,6 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Exception;
 
-public class CategoryNotFoundException extends EventTicketException{
+public class CategoryNotFoundException extends EventException{
 
     public CategoryNotFoundException() {
 

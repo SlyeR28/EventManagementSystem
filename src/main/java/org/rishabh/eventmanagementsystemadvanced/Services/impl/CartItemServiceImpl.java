@@ -3,6 +3,8 @@ package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.*;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PricingStrategyType;
+import org.rishabh.eventmanagementsystemadvanced.Exception.EventNotFoundException;
+import org.rishabh.eventmanagementsystemadvanced.Exception.UserNotFoundException;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.CartMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.CartItemResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.CartResponse;
@@ -34,9 +36,12 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public CartResponse addItemToCart(Long userId, AddToCartRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Event event = eventRepository.findById(request.getEventId()).orElseThrow(() -> new RuntimeException("Event not found"));
-        TicketType ticketType = ticketTypeRepository.findById(request.getTicketTypeId()).orElseThrow(() -> new RuntimeException("Ticket Type not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found : " +userId));
+        Event event = eventRepository.findById(request.getEventId())
+                .orElseThrow(() -> new EventNotFoundException("Event not found : " +request.getEventId()));
+        TicketType ticketType = ticketTypeRepository.findById(request.getTicketTypeId())
+                .orElseThrow(() -> new RuntimeException("Ticket Type not found"));
         if(ticketType.getRemainingQuantity()<request.getQuantity()){
             throw new IllegalStateException("Ticket Quantity Exceeded");
         }

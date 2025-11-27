@@ -1,6 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Exception;
 
-public class CartNotFoundException extends EventTicketException{
+public class CartNotFoundException extends EventException{
 
     public CartNotFoundException() {
     }

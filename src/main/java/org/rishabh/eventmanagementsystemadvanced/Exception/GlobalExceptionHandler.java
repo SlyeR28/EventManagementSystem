@@ -11,33 +11,26 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailException.class)
-    public ResponseEntity<Map<String , Object>> handleEmailException(EmailException ex){
+    public ResponseEntity<ApiResponse> handleEmailException(EmailException ex){
         log.error(" EmailException: {}"  , ex.getMessage());
-        Map<String , Object>  body = new HashMap<>();
-        body.put("timestamp", System.currentTimeMillis());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", ex.getMessage());
-
-        return new ResponseEntity<>(body , HttpStatus.BAD_REQUEST);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage(ex.getMessage());
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ImageException.class)
-    public ResponseEntity<Map<String , Object>> handleImageException(ImageException ex){
+    public ResponseEntity<ApiResponse> handleImageException(ImageException ex){
         log.error(" ImageException: {}"  , ex.getMessage());
-        Map<String , Object>  body = new HashMap<>();
-        body.put("timestamp", System.currentTimeMillis());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", ex.getMessage());
-        return new ResponseEntity<>(body , HttpStatus.BAD_REQUEST);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage(ex.getMessage());
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
@@ -80,6 +73,39 @@ public class GlobalExceptionHandler {
         apiResponse.setMessage("Ticket Not Found");
         return  new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(TicketTypeException.class)
+    public ResponseEntity<ApiResponse> handleTicketTypeException(TicketTypeException ex){
+        log.error(" Caught TicketTypeException "  , ex);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage("Ticket Type Not Found");
+        return  new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OrderItemNotFound.class)
+    public ResponseEntity<ApiResponse> handleOrderItemNotFound(OrderItemNotFound ex){
+        log.error(" Caught OrderItemNotFound "  , ex);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage("Order Item Not Found");
+        return  new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OrderNotFound.class)
+    public ResponseEntity<ApiResponse> handleOrderNotFound(OrderNotFound ex){
+        log.error(" Caught OrderNotFound "  , ex);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage("Order Not Found");
+        return  new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UserNotActivatedException.class)
+    public ResponseEntity<ApiResponse> handleUserNotActivatedException(UserNotActivatedException ex){
+        log.error(" Caught UserNotActivatedException "  , ex);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage("User Not Activated");
+        return  new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
