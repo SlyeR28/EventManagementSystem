@@ -3,6 +3,8 @@ package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.TicketType;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PricingStrategyType;
+import org.rishabh.eventmanagementsystemadvanced.Mapper.TicketTypeMapper;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.TicketTypeDto;
 import org.rishabh.eventmanagementsystemadvanced.Repository.TicketTypeRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.DynamicPricingService;
 import org.rishabh.eventmanagementsystemadvanced.Utils.DynamicPricingEngine.DynamicPriceEngine;
@@ -22,13 +24,14 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
     private final TicketTypeRepository  ticketTypeRepository;
     private final DynamicPricingFactory dynamicPricingFactory;
     private final DomainEventPublisher domainEventPublisher;
+    private final TicketTypeMapper  ticketTypeMapper;
 
     private static final double NOTIFICATION_THRESHOLD = 0.75;
 
 
     @Transactional
     @Override
-    public TicketType applyPricing(Long ticketTypeId, PricingStrategyType strategyType) {
+    public TicketTypeDto applyPricing(Long ticketTypeId, PricingStrategyType strategyType) {
         TicketType ticketType = ticketTypeRepository.findById(ticketTypeId)
                 .orElseThrow(() -> new RuntimeException("Ticket Type Not Found"));
 
@@ -63,9 +66,11 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
             }
         }
 
-            return ticketTypeRepository.save(ticketType);
+        TicketType saved = ticketTypeRepository.save(ticketType);
 
-        }
+        return ticketTypeMapper.toResponse(saved);
+
+    }
 
 
 }

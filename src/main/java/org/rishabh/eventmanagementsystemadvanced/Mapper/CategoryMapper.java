@@ -2,6 +2,7 @@ package org.rishabh.eventmanagementsystemadvanced.Mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Category;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Event;
@@ -11,7 +12,7 @@ import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.CategoryRequest
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CategoryMapper {
 
   CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);

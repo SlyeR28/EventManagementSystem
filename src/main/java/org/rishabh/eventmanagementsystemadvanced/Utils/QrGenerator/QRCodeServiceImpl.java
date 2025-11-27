@@ -1,52 +1,69 @@
 package org.rishabh.eventmanagementsystemadvanced.Utils.QrGenerator;
 
-
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-import lombok.extern.slf4j.Slf4j;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ImageInfo;
+import org.rishabh.eventmanagementsystemadvanced.Services.ImageBase;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
+import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
-@Slf4j
 @Service
-public class QRCodeServiceImpl implements QRCodeService {
+public class QRCodeServiceImpl extends ImageBase implements QRCodeService {
 
-
-    private static final String QR_CODE_DIR = "uploads/qrcodes/";
+    public QRCodeServiceImpl(Cloudinary cloudinary) {
+        super(cloudinary);
+    }
 
     @Override
     public String generateQR(String content) {
-
         try {
-            File dir = new File(QR_CODE_DIR);
-            if (!dir.exists()) dir.mkdirs();
 
-            String fileName = UUID.randomUUID() + ".png";
-            String filePath = QR_CODE_DIR + fileName;
 
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(content, BarcodeFormat.QR_CODE, 300, 300);
 
-            Path path = FileSystems.getDefault().getPath(filePath);
-            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+            ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
+            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+            byte[] qrBytes = pngOutputStream.toByteArray();
 
-            log.info("✅ QR Code generated for ticket: {}", content);
-            return "/qrcodes/" + fileName; // URL to be served by frontend/static handler
 
-        } catch (WriterException | IOException e) {
-            log.error("❌ Failed to generate QR code", e);
+            String publicId = "qr_" + UUID.randomUUID();
+
+
+            Map uploadResult = super.cloudinary.uploader().upload(
+                    qrBytes,
+                    ObjectUtils.asMap(
+                            "folder", "qr-codes",
+                            "public_id", publicId
+                    )
+            );
+
+            // 4️⃣ Create metadata record (if needed to store in DB later)
+            ImageInfo imageInfo = new ImageInfo(
+                    uploadResult.get("public_id").toString(),
+                    uploadResult.get("secure_url").toString(),
+                    uploadResult.get("format").toString(),
+                    LocalDateTime.now()
+            );
+
+
+            return imageInfo.securedUrl();
+
+        } catch (WriterException e) {
+
             throw new RuntimeException("Error generating QR code");
+        } catch (Exception e) {
+
+            throw new RuntimeException("Error uploading QR code");
         }
-
     }
-
-
 }

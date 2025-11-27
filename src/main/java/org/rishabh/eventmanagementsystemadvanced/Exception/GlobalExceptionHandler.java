@@ -1,6 +1,5 @@
 package org.rishabh.eventmanagementsystemadvanced.Exception;
 
-import com.cloudinary.api.exceptions.ApiException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
@@ -11,7 +10,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.yaml.snakeyaml.constructor.ConstructorException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +58,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EventNotFoundException.class)
-    public ResponseEntity<ApiResponse>hanldleEventNotFoundException(EventNotFoundException ex){
+    public ResponseEntity<ApiResponse>handleEventNotFoundException(EventNotFoundException ex){
         log.error(" Caught EventNotFoundException "  , ex);
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setMessage("Event Not Found");

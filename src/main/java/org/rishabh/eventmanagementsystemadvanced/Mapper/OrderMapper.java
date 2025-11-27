@@ -2,12 +2,13 @@ package org.rishabh.eventmanagementsystemadvanced.Mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Order;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.OrderResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.OrderRequest;
 
-@Mapper(componentModel = "spring" , uses = {OrderItemMapper.class})
+@Mapper(componentModel = "spring", uses = {OrderItemMapper.class}, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface OrderMapper {
 
     OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);

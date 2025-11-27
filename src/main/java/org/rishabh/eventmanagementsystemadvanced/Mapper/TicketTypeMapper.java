@@ -2,12 +2,13 @@ package org.rishabh.eventmanagementsystemadvanced.Mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.TicketType;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.TicketTypeDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.TicketTypeRequest;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring" , unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TicketTypeMapper {
 
 

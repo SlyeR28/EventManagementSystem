@@ -2,36 +2,28 @@ package org.rishabh.eventmanagementsystemadvanced.Mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.ReportingPolicy;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Ticket;
-import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.TicketValidation;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.TicketResponse;
-import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ValidationResponse;
+import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.TicketRequest;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TicketMapper {
 
-    TicketMapper INSTANCE = Mappers.getMapper(TicketMapper.class);
-
-    @Mapping(source = "ticketType.name", target = "ticketTypeName")
-    @Mapping(source = "purchaser.fullName", target = "purchaserName")
+    // Entity -> Response DTO
+    @Mapping(target = "ticketTypeName", source = "ticketType.name")
+    @Mapping(target = "eventName", source = "ticketType.event.name")
+    @Mapping(target = "purchaserName", source = "purchaser.fullName")
+    @Mapping(target = "priceAtPurchase", source = "priceAtPurchase")
+    @Mapping(target = "purchasedAt", source = "createdAt")
     TicketResponse toResponse(Ticket ticket);
 
-
-//    @Named("mapValidations")
-//    default List<ValidationResponse> mapValidations(List<TicketValidation> validations) {
-//        return validations.stream()
-//                .map(v -> ValidationResponse.builder()
-//                        .id(v.getId())
-//                        .validationStatus(v.getValidationStatus())
-//                        .validationMethod(v.getValidationMethod())
-//                        .createdAt(v.getCreatedAt())
-//                        .build())
-//                .collect(Collectors.toList());
-//    }
+    // Request DTO -> Entity
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "ticketType", ignore = true)
+    @Mapping(target = "purchaser", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "qrCodeUrl", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    Ticket toEntity(TicketRequest request);
 }

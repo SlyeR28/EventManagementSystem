@@ -2,12 +2,13 @@ package org.rishabh.eventmanagementsystemadvanced.Mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Event;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.EventDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.EventRequest;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface EventMapper {
 
     EventMapper INSTANCE = Mappers.getMapper(EventMapper.class);

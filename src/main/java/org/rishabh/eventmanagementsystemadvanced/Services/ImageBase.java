@@ -15,7 +15,7 @@ import java.util.Map;
 public abstract class ImageBase {
 
 
-    private final Cloudinary cloudinary;
+    protected final Cloudinary cloudinary;
 
 
     protected ImageInfo upload(MultipartFile file , String folder){

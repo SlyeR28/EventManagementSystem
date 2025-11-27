@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.AuthResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.AuthRequest;
 import org.rishabh.eventmanagementsystemadvanced.Security.Jwt.JwtUtils;
+import org.rishabh.eventmanagementsystemadvanced.Security.Services.CustomUserDetails;
 import org.rishabh.eventmanagementsystemadvanced.Security.Services.CustomUserDetailsService;
 import org.rishabh.eventmanagementsystemadvanced.Services.UserService;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,21 @@ public class AuthController {
             AuthResponse authResponse = new AuthResponse();
             authResponse.setEmail(userDetails.getUsername());
             authResponse.setToken(token);
+
+            // --- ADD THIS BLOCK ---
+// Assuming your CustomUserDetails has the ID, or you fetch the user entity
+// If userDetails is an instance of your User entity or wraps it:
+// authResponse.setUserId(((CustomUserDetails) userDetails).getId());
+
+// OR if you need to fetch it:
+// User user = userService.getUserByEmail(authRequest.getEmail());
+// authResponse.setUserId(user.getId());
+// ----------------------
+
+            if (userDetails instanceof CustomUserDetails) {
+                authResponse.setUserId(((CustomUserDetails) userDetails).getId());
+            }
+
             return ResponseEntity.ok(authResponse);
         }
     }

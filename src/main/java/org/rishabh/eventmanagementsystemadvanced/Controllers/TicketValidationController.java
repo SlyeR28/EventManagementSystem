@@ -1,5 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.TicketValidationMethod;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ValidationResponse;
@@ -18,8 +19,9 @@ public class TicketValidationController {
 
     private final TicketValidationService ticketValidationService;
 
-    @PostMapping()
-    public ResponseEntity<ValidationResponse> validateTicket(@RequestBody TicketValidationRequest ticketValidationRequest) {
+
+    @PostMapping("/validate-ticket")
+    public ResponseEntity<ValidationResponse> validateTicket(@Valid @RequestBody TicketValidationRequest ticketValidationRequest) {
         TicketValidationMethod method = ticketValidationRequest.getTicketValidationMethod();
         ValidationResponse  ticketValidation;
         if(TicketValidationMethod.MANUAL.equals(method)){
