@@ -1,5 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PayamentVerficationResponse;
@@ -22,7 +23,7 @@ public class PaymentController {
 
     @PostMapping("/create/{provider}")
     public ResponseEntity<PaymentResponse> createPayment(@PathVariable String provider ,
-                                                         @RequestBody PaymentRequest paymentRequest) {
+                                                      @Valid @RequestBody PaymentRequest paymentRequest) {
         PaymentResponse payment = paymentService.makePayment(paymentRequest);
         return ResponseEntity.ok().body(payment);
     }

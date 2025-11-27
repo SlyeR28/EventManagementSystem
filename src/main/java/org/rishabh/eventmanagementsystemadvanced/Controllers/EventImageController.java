@@ -1,5 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ApiResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ImageInfo;
@@ -20,12 +21,9 @@ public class EventImageController {
     private final EventImageService eventImageService;
 
 
-    /**
-     * Upload or update event images.
-     * If images already exist, old ones are deleted and replaced.
-     */
+
     @PostMapping("/upload/{eventId}")
-    public ResponseEntity<List<ImageInfo>>  uploadOrUpdateEventImages(@PathVariable("eventId") Long eventId
+    public ResponseEntity<List<ImageInfo>>  uploadOrUpdateEventImages(@Valid @PathVariable("eventId") Long eventId
                                         ,@RequestParam ("files") List<MultipartFile> files) {
         List<ImageInfo> imageInfos = eventImageService.uploadEventImage(files, eventId);
         return ResponseEntity.status(HttpStatus.CREATED).body(imageInfos);
@@ -38,18 +36,13 @@ public class EventImageController {
     }
 
 
-    /**
-     * Delete all images associated with an event.
-     */
     @DeleteMapping("/del/{eventId}")
     public ResponseEntity<ApiResponse>deleteAllEventImage(@PathVariable("eventId") Long eventId) {
        eventImageService.deleteEventImages(eventId);
        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Event Image Deleted Successfully"));
     }
 
-    /**
-     * Delete singe image associated with an event.
-     */
+
     @DeleteMapping("/delete/{eventId}/{publicId}")
     public ResponseEntity<ApiResponse>deleteEventImage(@PathVariable("eventId") Long eventId ,@PathVariable String publicId) {
         eventImageService.deleteEventImage(eventId,publicId);
@@ -57,9 +50,7 @@ public class EventImageController {
     }
 
 
-    /**
-     * Get paginated event images.
-     */
+
     @GetMapping("/get-by/{eventId}")
     public ResponseEntity<Page<ImageInfo>> getEventImages(
             @PathVariable Long eventId,

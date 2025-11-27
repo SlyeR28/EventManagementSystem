@@ -1,5 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.AuthResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.AuthRequest;
@@ -36,7 +37,7 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse>login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<AuthResponse>login(@Valid @RequestBody AuthRequest authRequest) {
 
         if (!userService.isAccountActivated(authRequest.getEmail())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

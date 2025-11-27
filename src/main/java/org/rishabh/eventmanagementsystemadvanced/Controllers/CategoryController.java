@@ -27,13 +27,13 @@ public class CategoryController {
     }
 
     @PutMapping("/update/{categoryId}")
-    public ResponseEntity<CategoryDto>createCategory(@Valid @PathVariable Long categoryId  , @RequestBody CategoryRequest categoryRequest) {
+    public ResponseEntity<CategoryDto>updateCategory(@Valid @PathVariable Long categoryId  , @RequestBody CategoryRequest categoryRequest) {
         CategoryDto category = categoryService.updateCategory(categoryId, categoryRequest);
         return ResponseEntity.ok(category);
     }
 
     @GetMapping("/get/{categoryId}")
-    public ResponseEntity<CategoryDto>createCategory(@Valid @PathVariable Long categoryId) {
+    public ResponseEntity<CategoryDto>getCategory(@Valid @PathVariable Long categoryId) {
         CategoryDto category = categoryService.getCategory(categoryId);
         return ResponseEntity.ok(category);
     }

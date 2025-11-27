@@ -35,5 +35,4 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.getTicketsByUser(userId));
     }
 
-
 }

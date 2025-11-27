@@ -26,9 +26,9 @@ public class TicketTypeController {
         return new ResponseEntity<>( ticketType,HttpStatus.CREATED);
     }
 
-    @PutMapping("/update/{tickettypeId}")
-    public ResponseEntity<TicketTypeDto> updateTicketType(@PathVariable long tickettypeId, @Valid @RequestBody TicketTypeRequest ticketTypeRequest) {
-        TicketTypeDto ticketType = ticketTypeService.updateTicketType(tickettypeId, ticketTypeRequest);
+    @PutMapping("/update/{ticketTypeId}")
+    public ResponseEntity<TicketTypeDto> updateTicketType(@PathVariable long ticketTypeId, @Valid @RequestBody TicketTypeRequest ticketTypeRequest) {
+        TicketTypeDto ticketType = ticketTypeService.updateTicketType(ticketTypeId, ticketTypeRequest);
         return new ResponseEntity<>(ticketType,HttpStatus.OK);
     }
 
