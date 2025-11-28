@@ -46,6 +46,15 @@ public class CustomSecuirtyConfig {
                                 "/api/v1/user/activation"
                         ).permitAll()
                                 .requestMatchers("/Payment.html", "/api/payments/**").permitAll()
+                                .requestMatchers(
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/v3/api-docs/**",
+                                        "/v3/api-docs",
+                                        "/swagger-resources/**",
+                                        "/webjars/**"
+                                ).permitAll()
+
 //                        .requestMatchers(HttpMethod.GET, "/api/user-image/**").permitAll() // public image GET
 //                        .requestMatchers("/api/v1/user/**").authenticated()
 

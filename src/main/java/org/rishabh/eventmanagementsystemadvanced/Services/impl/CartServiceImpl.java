@@ -1,7 +1,7 @@
 package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.Cache;
+import org.springframework.cache.annotation.CacheEvict;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Cart;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.CartItem;
 import org.rishabh.eventmanagementsystemadvanced.Exception.CartNotFoundException;
@@ -23,12 +23,12 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
     private final CartMapper cartMapper;
 
-
     @Cacheable(value = "userCarts", key = "#userId")
     @Transactional(readOnly = true)
     @Override
     public CartResponse viewCart(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new CartNotFoundException("Cart not found" + userId));
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new CartNotFoundException("Cart not found" + userId));
 
         // Recalculate total (in case prices changed)
         double total = cart.getItems().stream()
@@ -40,6 +40,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @CacheEvict(value = "userCarts", key = "#userId")
     public void clearCart(Long userId) {
         Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("User not found"));
         cartItemRepository.deleteAll(cart.getItems());
