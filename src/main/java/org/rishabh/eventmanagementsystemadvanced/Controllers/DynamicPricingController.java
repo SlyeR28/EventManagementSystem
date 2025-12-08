@@ -1,7 +1,6 @@
 package org.rishabh.eventmanagementsystemadvanced.Controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.TicketType;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.PricingStrategyType;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.TicketTypeDto;
 import org.rishabh.eventmanagementsystemadvanced.Services.DynamicPricingService;

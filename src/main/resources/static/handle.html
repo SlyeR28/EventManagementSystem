@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Browser Check</title>
+    <style>
+        :root{
+            --bg: #f6f7fb; --card:#ffffff; --text:#1f2937; --muted:#6b7280; --accent:#2563eb; --border:#e5e7eb;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root{ --bg:#0b1020; --card:#0f172a; --text:#e5e7eb; --muted:#9aa4b2; --accent:#60a5fa; --border:#1f2937; }
+        }
+        *{ box-sizing:border-box }
+        html,body{ height:100% }
+        body{
+            margin:0; font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,sans-serif;
+            color:var(--text); background:
+                radial-gradient(1200px 700px at 20% -10%, rgba(37,99,235,0.12), transparent 60%),
+                radial-gradient(900px 600px at 110% 10%, rgba(99,102,241,0.1), transparent 55%),
+                var(--bg);
+            display:grid; place-items:center; padding:24px;
+        }
+        .card{
+            width:min(720px,100%); background:var(--card);
+            border:1px solid var(--border); border-radius:18px; padding:28px 28px 24px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.06);
+            text-align:center;
+        }
+        .badge{
+            display:inline-flex; align-items:center; gap:10px;
+            padding:10px 14px; border:1px solid var(--border); border-radius:999px; color:var(--muted);
+            background:linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+            margin-bottom:18px; font-size:14px;
+        }
+        .shield{ font-size:18px }
+        h1{ margin:0 0 8px; font-size:28px; line-height:1.2 }
+        p{ margin:0 0 12px; color:var(--muted) }
+        .row{ display:flex; align-items:center; justify-content:center; gap:16px; margin-top:10px }
+        .spinner{
+            width:20px; height:20px; border-radius:50%; border:3px solid transparent;
+            border-top-color:var(--accent); border-right-color:var(--accent); animation:spin 0.9s linear infinite;
+        }
+        @keyframes spin{ to{ transform:rotate(360deg) } }
+        .small{ font-size:13px }
+        .sep{ height:1px; background:var(--border); margin:18px 0 }
+        button{
+            appearance:none; border:none; border-radius:12px; padding:10px 14px; cursor:pointer;
+            background:var(--accent); color:#fff; font-weight:600; letter-spacing:.2px;
+            box-shadow:0 6px 18px rgba(37,99,235,.25);
+        }
+        button[disabled]{ opacity:.6; cursor:not-allowed; box-shadow:none }
+        code{ background:rgba(125,125,125,.12); padding:.1rem .35rem; border-radius:6px }
+        .hidden{ display:none }
+    </style>
+</head>
+<body>
+<main class="card" role="main" aria-live="polite">
+    <div class="badge"><span class="shield">🛡️</span> Browser verification</div>
+    <h1>Please hold on…</h1>
+    <p>This process usually takes less than 2&nbsp;seconds.</p>
+
+    <div class="row">
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="status">Preparing access…</p>
+    </div>
+
+    <div class="sep"></div>
+    <p class="small">
+        If this page does not redirect automatically, click
+        <button id="retry" type="button" class="small">Try again</button>
+    </p>
+
+    <noscript>
+        <div class="sep"></div>
+        <p><strong>JavaScript is required.</strong> Please enable JavaScript and reload this page.</p>
+    </noscript>
+</main>
+
+<script>
+    (function(){
+        const nextUrl = new URLSearchParams(location.search).get("next") || "/";
+        const statusEl = document.getElementById("status");
+        const retryBtn = document.getElementById("retry");
+
+        // Minimal headless detection – only webdriver
+        const isHeadless = !!navigator.webdriver;
+
+        // Only way to get the cookie: JS calls POST /challenge/ok
+        async function passOnce(signal){
+            const res = await fetch("/challenge/ok", {
+                method: "POST",
+                credentials: "include",
+                headers: { "X-CH": "1" },
+                cache: "no-store",
+                signal
+            });
+            return res.ok;
+        }
+
+        async function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+        async function run(){
+            if(isHeadless){
+                statusEl.textContent = "Automated mode detected. Redirecting…";
+                location.replace("/blocked"); // handled by HAProxy/Nginx
+                return;
+            }
+
+            const controller = new AbortController();
+            const attempts = [0, 300, 800];
+            for(let i=0;i<attempts.length;i++){
+                if(attempts[i]) await sleep(attempts[i]);
+                statusEl.textContent = i === 0 ? "Verifying…" : `Retrying (${i+1}/${attempts.length})…`;
+                try{
+                    const ok = await passOnce(controller.signal);
+                    if(ok){
+                        statusEl.textContent = "Done. Redirecting…";
+                        location.replace(nextUrl);
+                        return;
+                    }
+                }catch(e){
+                    // ignore and retry
+                }
+            }
+
+            statusEl.textContent = "Verification failed. Please try again.";
+            retryBtn.disabled = false;
+        }
+
+        retryBtn.addEventListener("click", () => {
+            retryBtn.disabled = true;
+            statusEl.textContent = "Retrying…";
+            run();
+        });
+
+        retryBtn.disabled = true;
+        run();
+    })();
+</script>
+</body>
+</html>

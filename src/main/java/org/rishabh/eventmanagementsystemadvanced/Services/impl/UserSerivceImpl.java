@@ -3,6 +3,7 @@ package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 import lombok.RequiredArgsConstructor;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.User;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.Role;
+import org.rishabh.eventmanagementsystemadvanced.Exception.UserNotFoundException;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.UserMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PagedResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.UserDto;
@@ -108,7 +109,7 @@ public class UserSerivceImpl implements UserService {
     @Override
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id " + id));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id " + id));
         return userMapper.toDto(user);
     }
 

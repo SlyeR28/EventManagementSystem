@@ -3,6 +3,8 @@ package org.rishabh.eventmanagementsystemadvanced.Services.impl;
 import com.cloudinary.Cloudinary;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Event;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Images;
+import org.rishabh.eventmanagementsystemadvanced.Exception.EventNotFoundException;
+import org.rishabh.eventmanagementsystemadvanced.Exception.ImageException;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.ImageInfo;
 import org.rishabh.eventmanagementsystemadvanced.Repository.EventRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.ImageRepository;
@@ -49,12 +51,18 @@ public class EventImageServiceImpl extends ImageBase implements EventImageServic
                imageRepository.deleteAll(event.getImages());
                event.getImages().clear();
            }
+
+        String folder = "eventImage" + eventId;
+
         // Upload new images
         List<Images> uploadedImages = files.stream()
                 .map(file -> {
-                    ImageInfo info = upload(file, "eventImage" + eventId);
+                    ImageInfo info = upload(file, folder);
+                    String fullPublicId = info.publicId();
+                    String shortPublicId = fullPublicId.substring(fullPublicId.lastIndexOf("/") + 1);
                     return Images.builder()
-                            .publicId(info.publicId())
+                            .publicId(shortPublicId)
+                            .folder(folder)
                             .securedUrl(info.securedUrl())
                             .format(info.format())
                             .uploadedAt(info.uploadedAt())
@@ -62,6 +70,7 @@ public class EventImageServiceImpl extends ImageBase implements EventImageServic
                             .build();
                 })
                 .collect(Collectors.toList());
+
 
         imageRepository.saveAll(uploadedImages);
         event.getImages().addAll(uploadedImages);
@@ -94,11 +103,11 @@ public class EventImageServiceImpl extends ImageBase implements EventImageServic
                 )).collect(Collectors.toList());
 
     }
-    @CacheEvict(value = "eventImage" , key = "#eventId")
+    @CacheEvict(value = "eventImages" , key = "#eventId")
     @Override
     public void deleteEventImages(Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found" + eventId));
+                .orElseThrow(() -> new EventNotFoundException("Event not found" + eventId));
 
         event.getImages().forEach(image-> delete(image.getPublicId()));
         imageRepository.deleteAll(event.getImages());
@@ -107,18 +116,20 @@ public class EventImageServiceImpl extends ImageBase implements EventImageServic
 
     }
 
-    @CacheEvict(value = "eventImage" , key = "#eventId")
+    @CacheEvict(value = "eventImages" , key = "#eventId")
     @Override
     public void deleteEventImage(Long eventId, String publicId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found" + eventId));
+                .orElseThrow(() -> new EventNotFoundException("Event not found" + eventId));
+
         Images eventImage = event.getImages().stream()
                 .filter(img -> img.getPublicId().equals(publicId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("event image not found" + eventId));
-        delete(publicId);
-        imageRepository.delete(eventImage);
+                .orElseThrow(() -> new ImageException("event image not found" + publicId));
+
+        delete(eventImage.getFolder() + "/" + eventImage.getPublicId());
         event.getImages().remove(eventImage);
+        imageRepository.delete(eventImage);
         eventRepository.save(event);
 
     }

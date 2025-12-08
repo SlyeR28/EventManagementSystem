@@ -20,6 +20,9 @@ public interface TicketTypeMapper {
     @Mapping(target = "tickets", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "basePrice", source = "basePrice")
+    @Mapping(target = "totalQuantity", source = "totalQuantity")
     TicketType toEntity(TicketTypeRequest request);
 
     // Entity -> Response DTO

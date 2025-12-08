@@ -46,9 +46,13 @@ public class User {
 
     private Boolean isActive;
 
+    @Column(length = 100)
+    private String resetPasswordToken;
+
+    private LocalDateTime resetPasswordTokenExpiry;
 
 
-    @OneToOne(cascade = CascadeType.ALL , orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL , orphanRemoval = true , fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id")
     private Images profileImage;
 

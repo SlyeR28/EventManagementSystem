@@ -1,7 +1,7 @@
 package org.rishabh.eventmanagementsystemadvanced.Domains.Modal;
 
 public enum OrderStatus {
-  PENDING,
+    PENDING,
     CREATED,
     CONFIRMED,
     CANCELLED

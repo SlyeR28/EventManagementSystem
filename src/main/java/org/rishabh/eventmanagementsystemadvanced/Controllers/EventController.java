@@ -98,7 +98,7 @@ public class EventController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     @PutMapping("/{organizerId}/{eventId}/sales-time")
-    public ResponseEntity<EventDto> updateSalesTime(
+    public ResponseEntity<EventDto> startSalesTime(
             @PathVariable Long organizerId,
             @PathVariable Long eventId,
             @Valid @RequestBody SalesTimeRequest request) {

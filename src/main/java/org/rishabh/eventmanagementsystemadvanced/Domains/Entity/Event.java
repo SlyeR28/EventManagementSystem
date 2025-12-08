@@ -82,7 +82,7 @@ public class Event {
     private Category category;
 
 
-    @OneToMany(mappedBy = "event" ,  cascade = CascadeType.ALL , orphanRemoval = true)
+    @OneToMany(mappedBy = "event" ,  cascade = CascadeType.ALL , orphanRemoval = true , fetch =  FetchType.LAZY)
     private List<Images>images = new ArrayList<>();
 
 

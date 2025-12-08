@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.lang.ScopedValue;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     Optional<User> findByEmail(String email);
     Optional<User> findByActivationCode(String activationCode);
+    Optional<User> findByResetPasswordToken(String resetPasswordToken);
+
     Page<User>findByRole(Role role, Pageable pageable);
 
     Page<User> findByRoleIn(List<String> roles, Pageable pageable);
@@ -31,5 +34,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Query("SELECT DISTINCT u FROM User u WHERE u.id IN " +
             "(SELECT c.user.id FROM Cart c WHERE c.id = :eventId)")
     List<User> findUsersWithTicketsInCart(@Param("eventId") Long eventId);
+
 
 }
