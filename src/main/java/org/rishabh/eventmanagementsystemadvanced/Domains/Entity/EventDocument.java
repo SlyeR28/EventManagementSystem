@@ -34,11 +34,14 @@ public class EventDocument {
     private String status; // EventStatus: DRAFT, PUBLISHED, ONGOING
 
 
-    @Field(type = FieldType.Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss")
+    @Field(type = FieldType.Date, format = {},
+            pattern = "uuuu-MM-dd['T'HH:mm:ss][.SSS]")
     private LocalDateTime startTime;
 
-    @Field(type = FieldType.Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss")
+    @Field(type = FieldType.Date, format = {},
+            pattern = "uuuu-MM-dd['T'HH:mm:ss][.SSS]")
     private LocalDateTime endTime;
+
 
     @Field(type = FieldType.Keyword)
     private String categoryName; // store category name

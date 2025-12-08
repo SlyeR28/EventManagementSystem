@@ -10,7 +10,6 @@ import org.rishabh.eventmanagementsystemadvanced.Mapper.OrderMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.OrderResponse;
 import org.rishabh.eventmanagementsystemadvanced.Repository.CartRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.OrderRepository;
-import org.rishabh.eventmanagementsystemadvanced.Services.CartService;
 import org.rishabh.eventmanagementsystemadvanced.Services.OrderService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +33,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse placeOrder(Long userId) {
         // 1️⃣ Get cart
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException("Cart id not found : " +userId));
+                .orElseThrow(() -> new CartNotFoundException("Cart id not found : with username " +userId));
 
         if(cart.getItems().isEmpty()) {
             throw new CartNotFoundException("Cart items not found : " +userId );

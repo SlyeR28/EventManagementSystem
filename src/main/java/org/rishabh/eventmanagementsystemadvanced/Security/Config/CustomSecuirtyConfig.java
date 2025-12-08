@@ -27,12 +27,12 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true , prePostEnabled = true)
+@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @RequiredArgsConstructor
 public class CustomSecuirtyConfig {
 
-    private final UserDetailsService  userDetailsService;
-    private final JwtAuthFilter  jwtAuthFilters;
+    private final UserDetailsService userDetailsService;
+    private final JwtAuthFilter jwtAuthFilters;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -43,26 +43,25 @@ public class CustomSecuirtyConfig {
                         .requestMatchers(
                                 "/api/v1/user/register",
                                 "/api/v1/auth/login",
-                                "/api/v1/user/activation"
-                        ).permitAll()
-                                .requestMatchers("/Payment.html", "/api/payments/**").permitAll()
-                                .requestMatchers(
-                                        "/swagger-ui/**",
-                                        "/swagger-ui.html",
-                                        "/v3/api-docs/**",
-                                        "/v3/api-docs",
-                                        "/swagger-resources/**",
-                                        "/webjars/**"
-                                ).permitAll()
+                                "/api/v1/user/activation")
+                        .permitAll()
+                        .requestMatchers("/Payment.html", "/api/payments/**").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs",
+                                "/swagger-resources/**",
+                                "/webjars/**")
+                        .permitAll()
 
-//                        .requestMatchers(HttpMethod.GET, "/api/user-image/**").permitAll() // public image GET
-//                        .requestMatchers("/api/v1/user/**").authenticated()
+                        // .requestMatchers(HttpMethod.GET, "/api/user-image/**").permitAll() // public
+                        // image GET
+                        // .requestMatchers("/api/v1/user/**").authenticated()
 
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilters, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -73,12 +72,13 @@ public class CustomSecuirtyConfig {
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(){
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder());
         provider.setUserDetailsService(userDetailsService);
         return provider;
     }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

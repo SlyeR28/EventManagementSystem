@@ -33,34 +33,27 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventSearchServiceImpl implements EventSearchService {
 
-
     private final EventSearchRepository eventSearchRepository;
     private final EventRepository eventRepository;
-    private final ElasticsearchOperations  elasticsearchOperations;
+    private final ElasticsearchOperations elasticsearchOperations;
 
-
-
-    private static final List<String> PUBLIC_STATUS  = Arrays.asList("PUBLISHED", "ONGOING");
-
-
+    private static final List<String> PUBLIC_STATUS = Arrays.asList("PUBLISHED", "ONGOING");
 
     @Transactional
     @Override
     @CacheEvict(value = "events", allEntries = true)
     public void indexEvent(Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(
-                () -> new EventNotFoundException("Event not found with id " + eventId)
-        );
+                () -> new EventNotFoundException("Event not found with id " + eventId));
         EventDocument doc = convertToEventDocument(event);
         eventSearchRepository.save(doc);
-
 
     }
 
     @Override
     @CacheEvict(value = "events", allEntries = true)
     public void deleteIndexedEvent(Long eventId) {
-         eventSearchRepository.deleteById(eventId);
+        eventSearchRepository.deleteById(eventId);
 
     }
 
@@ -69,7 +62,7 @@ public class EventSearchServiceImpl implements EventSearchService {
     @CacheEvict(value = "events", allEntries = true)
     public void reindexAllEvents() {
         List<Event> events = eventRepository.findAll();
-        List<EventDocument>docs = events.stream()
+        List<EventDocument> docs = events.stream()
                 .map(this::convertToEventDocument)
                 .collect(Collectors.toList());
         eventSearchRepository.saveAll(docs);
@@ -77,65 +70,81 @@ public class EventSearchServiceImpl implements EventSearchService {
     }
 
     @Override
-    @Cacheable(value = "events", key = "#request.page + '-' + #request.pageSize +" +
-            " '-' + (#request.keyword ?: '') + '-' + (#request.venue ?: '') + '-' + (#request.category ?: '')")
-    public PagedResponse<EventSearchResponse> searchEvents(SearchRequest request , Authentication authentication) {
+    @Cacheable(
+            value = "events",
+            key = "#request.page + '-' + #request.pageSize + '-' + (#request.keyword ?: '') + '-' + (#request.venue ?: '') + '-' + (#request.category ?: '')"
+    )
+    public PagedResponse<EventSearchResponse> searchEvents(SearchRequest request, Authentication authentication) {
+
         Criteria criteria = new Criteria();
 
-      // 1. Role- based status filtering
-        boolean isAdminOrganiser = false;
-        if(authentication != null){
-            isAdminOrganiser = authentication.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .anyMatch(role -> role.equals("ROLE_ADMIN") ||  role.equals("ROLE_ORGANISER"));
-        }
-        if(isAdminOrganiser){
-            // Admin/Organizer can search by specific status if provided , otherwise all
-            if(request.getStatus() != null && !request.getStatus().isEmpty()){
-              criteria  = criteria.and("status").is(request.getStatus());
-            }else{
-                // Public/ user : Force PUBLISHED or ONGOING
-                // if they request a specific status , check if it's allowed
-                if(request.getStatus() != null && !request.getStatus().isEmpty()){
-                    if (PUBLIC_STATUS.contains(request.getStatus())) {
-                        criteria  = criteria.and("status").is(request.getStatus());
-                    }else {
-                        // if they ask for DRAFT/CANCELLED , return empty or force allowed statuses
-                        // Here we force allowed Statuses , effectively ignoring their invalid request or
-                        // return nothing ?
-                        // lets force allowed statuses to be Safe
-                        criteria  = criteria.and("status").in(PUBLIC_STATUS);
-                    }
-                }else {
-                    criteria  = criteria.and("status").in(PUBLIC_STATUS);
+        // ------------------------------
+        // 1. Check User Role
+        // ------------------------------
+        boolean isAdminOrganiser = authentication != null &&
+                authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .anyMatch(role -> role.equals("ROLE_ADMIN") || role.equals("ROLE_ORGANISER"));
+
+        // ------------------------------
+        // 2. Status Filter
+        // ------------------------------
+        if (isAdminOrganiser) {
+            // Admin/Organizer — override status if user provided it
+            if (request.getStatus() != null && !request.getStatus().isEmpty()) {
+                criteria = criteria.and("status").is(request.getStatus());
+            }
+        } else {
+            // Normal users — allow only PUBLIC statuses
+            if (request.getStatus() != null && !request.getStatus().isEmpty()) {
+                if (PUBLIC_STATUS.contains(request.getStatus())) {
+                    criteria = criteria.and("status").is(request.getStatus());
+                } else {
+                    criteria = criteria.and("status").in(PUBLIC_STATUS);
                 }
-            }
-            // 2. Keyword Search (Name or Description)
-            if (request.getKeyword() != null && !request.getKeyword().trim().isEmpty()) {
-                criteria = criteria.and(new Criteria("name").contains(request.getKeyword())
-                        .or("description").contains(request.getKeyword()));
-            }
-
-            // 3. Venue
-            if (request.getVenue() != null && !request.getVenue().isEmpty()) {
-                criteria = criteria.and("venue").is(request.getVenue());
-            }
-
-            // 4. Category
-            if (request.getCategory() != null && !request.getCategory().isEmpty()) {
-                criteria = criteria.and("categoryName").is(request.getCategory());
-            }
-
-            // 5. Date Range
-            if (request.getStartTime() != null) {
-                criteria = criteria.and("startTime").greaterThanEqual(request.getStartTime());
-            }
-            if (request.getEndTime() != null) {
-                criteria = criteria.and("endTime").lessThanEqual(request.getEndTime());
+            } else {
+                criteria = criteria.and("status").in(PUBLIC_STATUS);
             }
         }
 
+        // ------------------------------
+        // 3. Keyword Search
+        // ------------------------------
+        if (request.getKeyword() != null && !request.getKeyword().trim().isEmpty()) {
+            criteria = criteria.and(
+                    new Criteria("name").contains(request.getKeyword())
+                            .or("description").contains(request.getKeyword())
+            );
+        }
 
+        // ------------------------------
+        // 4. Venue Filter
+        // ------------------------------
+        if (request.getVenue() != null && !request.getVenue().isEmpty()) {
+            criteria = criteria.and("venue").is(request.getVenue());
+        }
+
+        // ------------------------------
+        // 5. Category Filter
+        // ------------------------------
+        if (request.getCategory() != null && !request.getCategory().isEmpty()) {
+            criteria = criteria.and("categoryName").is(request.getCategory());
+        }
+
+        // ------------------------------
+        // 6. Date Range Filters
+        // ------------------------------
+        if (request.getStartTime() != null) {
+            criteria = criteria.and("startTime").greaterThanEqual(request.getStartTime());
+        }
+
+        if (request.getEndTime() != null) {
+            criteria = criteria.and("endTime").lessThanEqual(request.getEndTime());
+        }
+
+        // ------------------------------
+        // 7. Execute Query
+        // ------------------------------
         PageRequest pageable = PageRequest.of(request.getPage(), request.getPageSize());
         CriteriaQuery query = new CriteriaQuery(criteria).setPageable(pageable);
 
@@ -146,21 +155,26 @@ public class EventSearchServiceImpl implements EventSearchService {
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
 
+        long total = searchHits.getTotalHits();
+        int totalPages = (int) Math.ceil((double) total / request.getPageSize());
+        boolean last = (long) (request.getPage() + 1) * request.getPageSize() >= total;
+
         return new PagedResponse<>(
                 content,
                 request.getPage(),
                 request.getPageSize(),
-                searchHits.getTotalHits(),
-                (int) Math.ceil((double) searchHits.getTotalHits() / request.getPageSize()),
-                (long) (request.getPage() + 1) * request.getPageSize() >= searchHits.getTotalHits());
+                total,
+                totalPages,
+                last
+        );
     }
-
-
 
 
     @Override
     public List<EventSearchResponse> fuzzySearch(String keyword) {
-        if(keyword == null || keyword.isEmpty()) {return List.of();}
+        if (keyword == null || keyword.isEmpty()) {
+            return List.of();
+        }
         // Using criteria for fuzzy search or name or description
         Criteria criteria = new Criteria().fuzzy(keyword)
                 .or(("description")).fuzzy(keyword);
@@ -173,9 +187,6 @@ public class EventSearchServiceImpl implements EventSearchService {
                 .collect(Collectors.toList());
     }
 
-
-
-
     // helper method to convert to response
     private EventSearchResponse convertToResponse(EventDocument eventDocument) {
         return EventSearchResponse.builder()
@@ -185,15 +196,14 @@ public class EventSearchServiceImpl implements EventSearchService {
                 .venue(eventDocument.getVenue())
                 .startTime(eventDocument.getStartTime())
                 .endTime(eventDocument.getEndTime())
-                .tickets(eventDocument.getTicketTypes() != null ?
-                        eventDocument.getTicketTypes().stream()
-                                .map(t-> EventSearchResponse.TicketInfo.builder()
-                                        .ticketId(t.getTicketTypeId())
-                                        .name(t.getName())
-                                        .currentPrice(t.getCurrentPrice())
-                                        .remainingQuantity(t.getRemainingQuantity())
-                                        .build())
-                                .collect(Collectors.toList()): null)
+                .tickets(eventDocument.getTicketTypes() != null ? eventDocument.getTicketTypes().stream()
+                        .map(t -> EventSearchResponse.TicketInfo.builder()
+                                .ticketId(t.getTicketTypeId())
+                                .name(t.getName())
+                                .currentPrice(t.getCurrentPrice())
+                                .remainingQuantity(t.getRemainingQuantity())
+                                .build())
+                        .collect(Collectors.toList()) : null)
 
                 .imageInfos(eventDocument.getImages() != null ? eventDocument.getImages()
                         .stream()
@@ -203,12 +213,10 @@ public class EventSearchServiceImpl implements EventSearchService {
                                 .folder(i.getFolder())
                                 .format(i.getFormat())
                                 .build())
-                                .collect(Collectors.toList())
+                        .collect(Collectors.toList())
                         : null)
                 .build();
     }
-
-
 
     // helper method to converting event to event document
     private EventDocument convertToEventDocument(Event event) {
@@ -221,31 +229,31 @@ public class EventSearchServiceImpl implements EventSearchService {
                         .currentPrice(ti.getCurrentPrice())
                         .totalQuantity(ti.getTotalQuantity())
                         .remainingQuantity(ti.getRemainingQuantity())
-                        .build()).collect(Collectors.toList());
-                List<ImageDocument>images = event.getImages()
-                        .stream()
-                        .map(i -> ImageDocument.builder()
-                                .securedUrl(i.getSecuredUrl())
-                                .publicId(i.getPublicId())
-                                .folder(i.getFolder())
-                                .format(i.getFormat())
-                                .build())
-                        .collect(Collectors.toList());
+                        .build())
+                .collect(Collectors.toList());
+        List<ImageDocument> images = event.getImages()
+                .stream()
+                .map(i -> ImageDocument.builder()
+                        .securedUrl(i.getSecuredUrl())
+                        .publicId(i.getPublicId())
+                        .folder(i.getFolder())
+                        .format(i.getFormat())
+                        .build())
+                .collect(Collectors.toList());
 
-                return EventDocument.builder()
-                        .id(event.getId())
-                        .name(event.getName())
-                        .description(event.getDescription())
-                        .venue(event.getVenue())
-                        .status(event.getStatus().name())
-                        .startTime(event.getStartTime())
-                        .endTime(event.getEndTime())
-                        .categoryName(event.getCategory() != null ? event.getCategory().getName() : null)
-                        .ticketTypes(tickets)
-                        .images(images)
-                        .build();
+        return EventDocument.builder()
+                .id(event.getId())
+                .name(event.getName())
+                .description(event.getDescription())
+                .venue(event.getVenue())
+                .status(event.getStatus().name())
+                .startTime(event.getStartTime())
+                .endTime(event.getEndTime())
+                .categoryName(event.getCategory() != null ? event.getCategory().getName() : null)
+                .ticketTypes(tickets)
+                .images(images)
+                .build();
 
     }
-
 
 }
