@@ -24,24 +24,23 @@ public class EventController {
 
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
-    @PostMapping("/create/{organizerId}")
+    @PostMapping("/create")
     public ResponseEntity<EventDto> createEvent(
-            @PathVariable Long organizerId,
+
             @Valid @RequestBody EventRequest eventRequest) {
 
-        EventDto createdEvent = eventService.createEvent(organizerId, eventRequest);
+        EventDto createdEvent = eventService.createEvent(eventRequest);
         return new ResponseEntity<>(createdEvent, HttpStatus.CREATED);
     }
 
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
-    @PutMapping("/update/{organizerId}/{eventId}")
+    @PutMapping("/update/{eventId}")
     public ResponseEntity<EventDto> updateEvent(
-            @PathVariable Long organizerId,
             @PathVariable Long eventId,
             @Valid @RequestBody EventRequest eventRequest) {
 
-        EventDto updatedEvent = eventService.updateEvent(organizerId, eventId, eventRequest);
+        EventDto updatedEvent = eventService.updateEvent( eventId, eventRequest);
         return ResponseEntity.ok(updatedEvent);
     }
 
@@ -60,20 +59,19 @@ public class EventController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
-    @DeleteMapping("/delete/{organizerId}/{eventId}")
+    @DeleteMapping("/delete/{eventId}")
     public ResponseEntity<ApisResponse> deleteEvent(
-            @PathVariable Long organizerId,
             @PathVariable Long eventId) {
 
-        eventService.deleteEvent(organizerId, eventId);
+        eventService.deleteEvent(eventId);
         return ResponseEntity.ok(new ApisResponse("Event deleted successfully"));
     }
 
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
-    @GetMapping("/organizer/{organizerId}")
-    public ResponseEntity<List<EventDto>> getEventsByOrganizer(@PathVariable Long organizerId) {
-        List<EventDto> events = eventService.getEventsByOrganizerId(organizerId);
+    @GetMapping("/organizer")
+    public ResponseEntity<List<EventDto>> getEventsByOrganizer() {
+        List<EventDto> events = eventService.getEventsByOrganizerId();
         return ResponseEntity.ok(events);
     }
 
@@ -86,12 +84,11 @@ public class EventController {
 
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
-    @PatchMapping("/publish/{organizerId}/{eventId}")
+    @PatchMapping("/publish/{eventId}")
     public ResponseEntity<EventDto> publishEvent(
-            @PathVariable Long organizerId,
             @PathVariable Long eventId) {
 
-        EventDto eventDto = eventService.publishEvent(organizerId, eventId);
+        EventDto eventDto = eventService.publishEvent( eventId);
         return ResponseEntity.ok(eventDto);
     }
 
@@ -103,7 +100,12 @@ public class EventController {
             @PathVariable Long eventId,
             @Valid @RequestBody SalesTimeRequest request) {
 
-        EventDto updated = eventService.startSalesTime(organizerId, eventId, request);
+        EventDto updated = eventService.startSalesTime(eventId, request);
         return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/my-events")
+    public ResponseEntity<List<EventDto>> getMyEvents() {
+        return ResponseEntity.ok(eventService.getEventsByCurrentUser());
     }
 }

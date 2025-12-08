@@ -6,6 +6,7 @@ import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.EventSearchResponse
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.SearchRequest;
 import org.rishabh.eventmanagementsystemadvanced.Services.EventSearchService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +20,8 @@ public class EventSearchController {
 
 
     @PostMapping("/search")
-    public ResponseEntity<PagedResponse<EventSearchResponse>> searchEvents(@RequestBody SearchRequest request) {
-        PagedResponse<EventSearchResponse> response = eventSearchService.searchEvents(request);
+    public ResponseEntity<PagedResponse<EventSearchResponse>> searchEvents(@RequestBody SearchRequest request , Authentication authentication) {
+        PagedResponse<EventSearchResponse> response = eventSearchService.searchEvents(request , authentication);
         return ResponseEntity.ok(response);
     }
 

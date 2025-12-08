@@ -2,7 +2,7 @@ package org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto;
 
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -19,8 +19,8 @@ public class EventSearchResponse {
     private String description;
     private String venue;
     private String categoryName;
-    private LocalDate startTime;
-    private LocalDate endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private List<TicketInfo> tickets;
     private List<ImageElkInfo> imageInfos;
 

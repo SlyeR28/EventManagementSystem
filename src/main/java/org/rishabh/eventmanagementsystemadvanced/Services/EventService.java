@@ -9,23 +9,24 @@ import java.util.List;
 public interface  EventService {
 
 
-    EventDto createEvent(Long organizerId, EventRequest eventRequest);
+    EventDto createEvent(EventRequest eventRequest);
 
-    EventDto updateEvent(Long organizerId, Long eventId, EventRequest eventRequest);
+    EventDto updateEvent(Long eventId, EventRequest eventRequest);
 
     EventDto getEvent(Long eventId);
 
     List<EventDto> getAllEvents();
 
-    void deleteEvent(Long organizerId, Long eventId);
+    void deleteEvent(Long eventId);
 
-    List<EventDto> getEventsByOrganizerId(Long organizerId);
+    List<EventDto> getEventsByOrganizerId();
 
     List<EventDto> getEventsByCategoryId(Long categoryId);
 
-    EventDto publishEvent(Long organizerId, Long eventId);
+    EventDto publishEvent( Long eventId);
 
-    EventDto startSalesTime(Long organizerId, Long eventId, SalesTimeRequest request);
+    EventDto startSalesTime( Long eventId, SalesTimeRequest request);
 
 
+    List<EventDto> getEventsByCurrentUser();
 }

@@ -7,6 +7,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -32,11 +33,12 @@ public class EventDocument {
     @Field(type = FieldType.Keyword)
     private String status; // EventStatus: DRAFT, PUBLISHED, ONGOING
 
-    @Field(type = FieldType.Date)
-    private LocalDate startTime;
 
-    @Field(type = FieldType.Date)
-    private LocalDate endTime;
+    @Field(type = FieldType.Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss")
+    private LocalDateTime startTime;
+
+    @Field(type = FieldType.Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss")
+    private LocalDateTime endTime;
 
     @Field(type = FieldType.Keyword)
     private String categoryName; // store category name

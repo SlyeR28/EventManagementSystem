@@ -5,7 +5,9 @@ import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Category;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.Event;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Entity.User;
 import org.rishabh.eventmanagementsystemadvanced.Domains.Modal.EventStatus;
-import org.rishabh.eventmanagementsystemadvanced.Exception.*;
+import org.rishabh.eventmanagementsystemadvanced.Exception.CategoryNotFoundException;
+import org.rishabh.eventmanagementsystemadvanced.Exception.EventNotFoundException;
+import org.rishabh.eventmanagementsystemadvanced.Exception.EventUpdateException;
 import org.rishabh.eventmanagementsystemadvanced.Mapper.EventMapper;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.EventDto;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.EventRequest;
@@ -14,6 +16,7 @@ import org.rishabh.eventmanagementsystemadvanced.Repository.CategoryRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.EventRepository;
 import org.rishabh.eventmanagementsystemadvanced.Repository.UserRepository;
 import org.rishabh.eventmanagementsystemadvanced.Services.EventService;
+import org.rishabh.eventmanagementsystemadvanced.Services.UserService;
 import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.DomainEventPublisher;
 import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifecycle.EventCancelled;
 import org.rishabh.eventmanagementsystemadvanced.Utils.EventListeners.EventLifecycle.EventDraftCreatedEvent;
@@ -26,7 +29,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,15 +42,17 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final EventMapper eventMapper;
     private final DomainEventPublisher domainEventPublisher;
+    private final UserService userService;
 
 
-    @CacheEvict(value = {"eventlist" , "events"} , allEntries = true)
+
+
+
+    @CacheEvict(value = {"eventList", "events"}, allEntries = true)
     @Override
-    public EventDto createEvent(Long organizerId, EventRequest eventRequest) {
-
-        // Fetch Organizer
-        User organizer = userRepository.findById(organizerId)
-                .orElseThrow(() -> new UserNotFoundException("Organizer not found with id " + organizerId));
+    public EventDto createEvent(EventRequest eventRequest) {
+        // fetch current organizer
+        User organizer = userService.getCurrentUser();
 
         // Fetch Category
         Category category = categoryRepository.findById(eventRequest.getCategoryId())
@@ -77,13 +81,15 @@ public class EventServiceImpl implements EventService {
     @CacheEvict(value = "eventList" ,  allEntries = true)
     @CachePut(value = "events" , key = "#eventId")
     @Override
-    public EventDto updateEvent(Long organizerId, Long eventId, EventRequest eventRequest) {
+    public EventDto updateEvent(Long eventId, EventRequest eventRequest) {
+
+        User organizer = userService.getCurrentUser();
 
         Event existingEvent = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found with id " + eventId));
 
         // Check ownership
-        if (!existingEvent.getOrganizer().getId().equals(organizerId)) {
+        if (!existingEvent.getOrganizer().getId().equals(organizer.getId())) {
             throw new EventUpdateException("You are not authorized to update this event");
         }
 
@@ -127,12 +133,15 @@ public class EventServiceImpl implements EventService {
             @CacheEvict(value = "eventsByOrganizer", key = "#organizerId")
     })
     @Override
-    public void deleteEvent(Long organizerId, Long eventId) {
+    public void deleteEvent( Long eventId) {
+
+        User organizer = userService.getCurrentUser();
+
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found with id " + eventId));
 
         // Verify ownership before delete
-        if (!event.getOrganizer().getId().equals(organizerId)) {
+        if (!event.getOrganizer().getId().equals(organizer.getId())) {
             throw new EventUpdateException("You are not authorized to delete this event");
         }
 
@@ -146,8 +155,9 @@ public class EventServiceImpl implements EventService {
     )
     @Transactional(readOnly = true)
     @Override
-    public List<EventDto> getEventsByOrganizerId(Long organizerId) {
-        return eventRepository.findByOrganizer_Id(organizerId)
+    public List<EventDto> getEventsByOrganizerId() {
+        User organizer = userService.getCurrentUser();
+        return eventRepository.findByOrganizer_Id(organizer.getId())
                 .stream()
                 .map(eventMapper::toDto)
                 .collect(Collectors.toList());
@@ -163,11 +173,14 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventDto publishEvent(Long organizerId, Long eventId) {
+    public EventDto publishEvent( Long eventId) {
+
+        User organizer = userService.getCurrentUser();
+
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found with id " + eventId));
 
-        if (!event.getOrganizer().getId().equals(organizerId)) {
+        if (!event.getOrganizer().getId().equals(organizer.getId())) {
             throw new EventUpdateException("You are not authorized to publish this event");
         }
 
@@ -181,11 +194,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventDto startSalesTime(Long organizerId, Long eventId, SalesTimeRequest request) {
+    public EventDto startSalesTime(Long eventId, SalesTimeRequest request) {
+        User organizer = userService.getCurrentUser();
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found with id " + eventId));
 
-        if (!event.getOrganizer().getId().equals(organizerId)) {
+        if (!event.getOrganizer().getId().equals(organizer.getId())) {
             throw new EventUpdateException("You are not authorized to reschedule this event");
         }
 
@@ -203,6 +217,16 @@ public class EventServiceImpl implements EventService {
         );
 
         return eventMapper.toDto(saved);
+    }
+
+    @Override
+    public List<EventDto> getEventsByCurrentUser() {
+        User organizer = userService.getCurrentUser();
+
+        return eventRepository.findByOrganizer_Id(organizer.getId())
+                .stream()
+                .map(eventMapper::toDto)
+                .collect(Collectors.toList());
     }
 
 }

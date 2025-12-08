@@ -3,6 +3,7 @@ package org.rishabh.eventmanagementsystemadvanced.Services;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.PagedResponse;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Request.SearchRequest;
 import org.rishabh.eventmanagementsystemadvanced.PayLoad.Dto.EventSearchResponse;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public interface EventSearchService {
     void reindexAllEvents();
 
 
-    PagedResponse<EventSearchResponse> searchEvents(SearchRequest request);
+    PagedResponse<EventSearchResponse> searchEvents(SearchRequest request , Authentication authentication);
 
 
 

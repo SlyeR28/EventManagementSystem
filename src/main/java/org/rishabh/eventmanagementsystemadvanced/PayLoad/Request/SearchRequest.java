@@ -17,6 +17,8 @@ public class SearchRequest {
     @Size(max = 50 , message = "Category must not exceed 50 characters")
     private String category;
 
+    private String status;
+
     @FutureOrPresent(message = "Start time must be in the present or future")
     private LocalDateTime startTime;
 

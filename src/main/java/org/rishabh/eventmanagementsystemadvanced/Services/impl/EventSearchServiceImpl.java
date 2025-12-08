@@ -14,12 +14,17 @@ import org.rishabh.eventmanagementsystemadvanced.Repository.EventSearchRepositor
 import org.rishabh.eventmanagementsystemadvanced.Services.EventSearchService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.Criteria;
+import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,10 +36,11 @@ public class EventSearchServiceImpl implements EventSearchService {
 
     private final EventSearchRepository eventSearchRepository;
     private final EventRepository eventRepository;
+    private final ElasticsearchOperations  elasticsearchOperations;
 
 
 
-    private static final List<String> EVENT_STATUS = Arrays.asList("PUBLISHED", "ONGOING");
+    private static final List<String> PUBLIC_STATUS  = Arrays.asList("PUBLISHED", "ONGOING");
 
 
 
@@ -73,49 +79,105 @@ public class EventSearchServiceImpl implements EventSearchService {
     @Override
     @Cacheable(value = "events", key = "#request.page + '-' + #request.pageSize +" +
             " '-' + (#request.keyword ?: '') + '-' + (#request.venue ?: '') + '-' + (#request.category ?: '')")
-    public PagedResponse<EventSearchResponse> searchEvents(SearchRequest request) {
+    public PagedResponse<EventSearchResponse> searchEvents(SearchRequest request , Authentication authentication) {
+        Criteria criteria = new Criteria();
+
+      // 1. Role- based status filtering
+        boolean isAdminOrganiser = false;
+        if(authentication != null){
+            isAdminOrganiser = authentication.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .anyMatch(role -> role.equals("ROLE_ADMIN") ||  role.equals("ROLE_ORGANISER"));
+        }
+        if(isAdminOrganiser){
+            // Admin/Organizer can search by specific status if provided , otherwise all
+            if(request.getStatus() != null && !request.getStatus().isEmpty()){
+              criteria  = criteria.and("status").is(request.getStatus());
+            }else{
+                // Public/ user : Force PUBLISHED or ONGOING
+                // if they request a specific status , check if it's allowed
+                if(request.getStatus() != null && !request.getStatus().isEmpty()){
+                    if (PUBLIC_STATUS.contains(request.getStatus())) {
+                        criteria  = criteria.and("status").is(request.getStatus());
+                    }else {
+                        // if they ask for DRAFT/CANCELLED , return empty or force allowed statuses
+                        // Here we force allowed Statuses , effectively ignoring their invalid request or
+                        // return nothing ?
+                        // lets force allowed statuses to be Safe
+                        criteria  = criteria.and("status").in(PUBLIC_STATUS);
+                    }
+                }else {
+                    criteria  = criteria.and("status").in(PUBLIC_STATUS);
+                }
+            }
+            // 2. Keyword Search (Name or Description)
+            if (request.getKeyword() != null && !request.getKeyword().trim().isEmpty()) {
+                criteria = criteria.and(new Criteria("name").contains(request.getKeyword())
+                        .or("description").contains(request.getKeyword()));
+            }
+
+            // 3. Venue
+            if (request.getVenue() != null && !request.getVenue().isEmpty()) {
+                criteria = criteria.and("venue").is(request.getVenue());
+            }
+
+            // 4. Category
+            if (request.getCategory() != null && !request.getCategory().isEmpty()) {
+                criteria = criteria.and("categoryName").is(request.getCategory());
+            }
+
+            // 5. Date Range
+            if (request.getStartTime() != null) {
+                criteria = criteria.and("startTime").greaterThanEqual(request.getStartTime());
+            }
+            if (request.getEndTime() != null) {
+                criteria = criteria.and("endTime").lessThanEqual(request.getEndTime());
+            }
+        }
 
 
-        PageRequest pageable  = PageRequest.of(request.getPage(), request.getPageSize());
-        String keyword = request.getKeyword() != null ? request.getKeyword() : " ";
+        PageRequest pageable = PageRequest.of(request.getPage(), request.getPageSize());
+        CriteriaQuery query = new CriteriaQuery(criteria).setPageable(pageable);
 
-        Page<EventDocument> eventPage = eventSearchRepository.
-                findByStatusInAndNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                        EVENT_STATUS , keyword  , keyword ,pageable
-                );
-        List<EventSearchResponse> content = eventPage.getContent()
-                .stream()
-                .map(this::convertToEventDocument)
+        SearchHits<EventDocument> searchHits = elasticsearchOperations.search(query, EventDocument.class);
+
+        List<EventSearchResponse> content = searchHits.getSearchHits().stream()
+                .map(SearchHit::getContent)
+                .map(this::convertToResponse)
                 .collect(Collectors.toList());
-
 
         return new PagedResponse<>(
                 content,
-                eventPage.getNumber(),
-                eventPage.getSize(),
-                eventPage.getTotalElements(),
-                eventPage.getTotalPages(),
-                eventPage.isLast()
-        );
+                request.getPage(),
+                request.getPageSize(),
+                searchHits.getTotalHits(),
+                (int) Math.ceil((double) searchHits.getTotalHits() / request.getPageSize()),
+                (long) (request.getPage() + 1) * request.getPageSize() >= searchHits.getTotalHits());
     }
+
 
 
 
     @Override
     public List<EventSearchResponse> fuzzySearch(String keyword) {
         if(keyword == null || keyword.isEmpty()) {return List.of();}
+        // Using criteria for fuzzy search or name or description
+        Criteria criteria = new Criteria().fuzzy(keyword)
+                .or(("description")).fuzzy(keyword);
+        CriteriaQuery query = new CriteriaQuery(criteria);
+        SearchHits<EventDocument> searchHits = elasticsearchOperations.search(query, EventDocument.class);
 
-        List<EventDocument> eventDocs = eventSearchRepository
-                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword , keyword);
-
-        return eventDocs.stream().map(this::convertToEventDocument).collect(Collectors.toList());
+        return searchHits.getSearchHits().stream()
+                .map(SearchHit::getContent)
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
 
 
 
     // helper method to convert to response
-    private EventSearchResponse convertToEventDocument(EventDocument eventDocument) {
+    private EventSearchResponse convertToResponse(EventDocument eventDocument) {
         return EventSearchResponse.builder()
                 .id(eventDocument.getId())
                 .name(eventDocument.getName())
@@ -176,8 +238,8 @@ public class EventSearchServiceImpl implements EventSearchService {
                         .description(event.getDescription())
                         .venue(event.getVenue())
                         .status(event.getStatus().name())
-                        .startTime(LocalDate.from(event.getStartTime()))
-                        .endTime(LocalDate.from(event.getEndTime()))
+                        .startTime(event.getStartTime())
+                        .endTime(event.getEndTime())
                         .categoryName(event.getCategory() != null ? event.getCategory().getName() : null)
                         .ticketTypes(tickets)
                         .images(images)
